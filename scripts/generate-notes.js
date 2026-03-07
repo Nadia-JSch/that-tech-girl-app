@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const notesDir = join(process.cwd(), "../blog-app/src/content/coding-notes");
-const targetDir = join(process.cwd(), "cloudflare/notes");
+const targetDir = join(process.cwd(), "notes");
 
 mkdirSync(targetDir, { recursive: true });
 
