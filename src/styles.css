@@ -36,6 +36,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -43,6 +44,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: var(--text);
+  overflow-x: hidden;
   background:
     radial-gradient(ellipse 80% 50% at 12% 18%, rgba(255, 255, 255, 0.7), transparent),
     radial-gradient(ellipse 60% 40% at 85% 10%, rgba(255, 222, 235, 0.7), transparent),
@@ -294,19 +296,21 @@ input {
 .app-shell {
   position: relative;
   max-width: 1240px;
+  width: 100%;
   margin: 0 auto;
   padding: 54px 18px 72px;
 }
 
 .marquee {
   position: absolute;
-  left: 18px;
-  right: 18px;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
+  width: 100%;
 }
 
 .marquee-top {
