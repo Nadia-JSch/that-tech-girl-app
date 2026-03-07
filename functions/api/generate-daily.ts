@@ -1,3 +1,9 @@
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" }
+  });
+
 const buildPrompt = ({ theme, topic, experienceLevel }: Record<string, string>) => `You are writing content for a hyper-feminine but smart women-in-tech PWA.
 
 Brand voice:
@@ -55,12 +61,12 @@ export default async function onRequest(context: { request: Request; env: { GEMI
   const { request, env } = context;
 
   if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   const apiKey = env.GEMINI_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "Missing GEMINI_API_KEY" }), { status: 500 });
+    return jsonResponse({ error: "Missing GEMINI_API_KEY" }, 500);
   }
 
   const payload = await request.json().catch(() => ({}));
@@ -95,18 +101,13 @@ export default async function onRequest(context: { request: Request; env: { GEMI
 
   if (!response.ok) {
     const errorText = await response.text();
-    return new Response(JSON.stringify({ error: "Gemini request failed", details: errorText }), {
-      status: response.status
-    });
+    return jsonResponse({ error: "Gemini request failed", details: errorText }, response.status);
   }
 
   try {
     const content = await parseJsonResponse(response);
-    return new Response(JSON.stringify({ content }), { status: 200 });
+    return jsonResponse({ content });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: "Failed to parse Gemini response", details: (error as Error).message }),
-      { status: 500 }
-    );
+    return jsonResponse({ error: "Failed to parse Gemini response", details: (error as Error).message }, 500);
   }
 };

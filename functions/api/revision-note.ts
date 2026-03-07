@@ -1,4 +1,10 @@
-import notesList from "../notes/notes.json" assert { type: "json" };
+import notesList from "../../notes/notes.json";
+
+const jsonResponse = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json" }
+  });
 
 type NoteEntry = {
   filename: string;
@@ -55,17 +61,17 @@ export default async function onRequest(context: { request: Request; env: { GEMI
   const { request, env } = context;
 
   if (request.method !== "GET") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   }
 
   const apiKey = env.GEMINI_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: "Missing GEMINI_API_KEY" }), { status: 500 });
+    return jsonResponse({ error: "Missing GEMINI_API_KEY" }, 500);
   }
 
   const notes = notesList as NoteEntry[];
   if (notes.length === 0) {
-    return new Response(JSON.stringify({ error: "No coding notes available" }), { status: 500 });
+    return jsonResponse({ error: "No coding notes available" }, 500);
   }
 
   const chosen = notes[Math.floor(Math.random() * notes.length)];
@@ -95,18 +101,13 @@ export default async function onRequest(context: { request: Request; env: { GEMI
 
   if (!response.ok) {
     const errorText = await response.text();
-    return new Response(JSON.stringify({ error: "Gemini request failed", details: errorText }), {
-      status: response.status
-    });
+    return jsonResponse({ error: "Gemini request failed", details: errorText }, response.status);
   }
 
   try {
     const content = await parseJsonResponse(response);
-    return new Response(JSON.stringify({ content, sourceFile: chosen.filename }), { status: 200 });
+    return jsonResponse({ content, sourceFile: chosen.filename });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: "Failed to parse Gemini response", details: (error as Error).message }),
-      { status: 500 }
-    );
+    return jsonResponse({ error: "Failed to parse Gemini response", details: (error as Error).message }, 500);
   }
 }
