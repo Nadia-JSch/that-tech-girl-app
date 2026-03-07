@@ -63,7 +63,13 @@ export const onRequestPost = async (context: CFContext) => {
 
   const apiKey = env.GEMINI_API_KEY;
   if (!apiKey) {
-    return jsonResponse({ error: "Missing GEMINI_API_KEY" }, 500);
+    const keys = Object.keys(env);
+    console.error("Missing GEMINI_API_KEY. Available env keys:", keys);
+    return jsonResponse({ 
+      error: "Missing GEMINI_API_KEY", 
+      envKeys: keys,
+      message: "Please ensure GEMINI_API_KEY is set in Settings > Build & deployments > Variables and Secrets > Production"
+    }, 500);
   }
 
   const payload = await request.json().catch(() => ({}));
