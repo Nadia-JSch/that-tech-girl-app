@@ -1,5 +1,6 @@
 
 
+
 import notesList from "../../notes/notes.json";
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -81,7 +82,7 @@ export const onRequestGet = async (context: CFContext) => {
   const chosen = notes[Math.floor(Math.random() * notes.length)];
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
     {
       method: "POST",
       headers: {
