@@ -120,6 +120,66 @@ export const lessons: Lesson[] = [
       "Pair it with gap and padding tokens so the layout breathes."
     ],
     snippet: `.card-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n  gap: 1rem;\n}`
+  },
+  {
+    id: "lesson-css-has",
+    title: "Select parents with :has()",
+    category: "code",
+    summary: "The CSS :has() selector is a 'family selector' that lets you style a parent based on its children.",
+    bullets: [
+      "Style a card differently if it contains an image.",
+      "Highlight a form group if its input is invalid.",
+      "No more 'js-parent-class' hacks needed for simple layout shifts."
+    ],
+    snippet: `.card:has(img) {\n  padding: 0;\n  overflow: hidden;\n}`
+  },
+  {
+    id: "lesson-pr-bestie",
+    title: "Review PRs like a bestie",
+    category: "career",
+    summary: "Great code reviews balance technical rigor with genuine encouragement.",
+    bullets: [
+      "Lead with what you love before suggesting changes.",
+      "Use 'we' and 'our' to keep it collaborative.",
+      "Ask questions (e.g., 'What do you think about...?') instead of giving orders."
+    ],
+    snippet: `\"Love the logic here! Quick thought: would extracting this into a helper make it easier to test?\"`
+  },
+  {
+    id: "lesson-aliases",
+    title: "Save time with shell aliases",
+    category: "tools",
+    summary: "Stop typing long commands over and over. Your shell is your personal assistant.",
+    bullets: [
+      "Add aliases to your .zshrc or .bashrc file.",
+      "Shorten 'git status' to 'gs' or 'npm run dev' to 'nd'.",
+      "Include frequent paths like 'alias cdn=\"cd ~/Documents/notes\"'."
+    ],
+    snippet: `alias gs='git status'\nalias gcm='git commit -m'\nalias nrd='npm run dev'`
+  },
+  {
+    id: "lesson-brag-doc",
+    title: "Maintain a brag document",
+    category: "career",
+    summary: "Don't wait for your performance review to remember your wins. Write them down as they happen.",
+    bullets: [
+      "Log technical wins, mentorship moments, and bug fixes.",
+      "Note down nice things teammates say about your work.",
+      "Update it once a week for 10 minutes—your future self will thank you."
+    ],
+    snippet: `### Week of March 8\n- Fixed the race condition in the auth flow.\n- Mentored a junior on CSS Grid.\n- Shipped the 'Midnight Princess' dark mode.`
+  },
+  {
+    id: "lesson-ts-record",
+    title: "Type dynamic objects with Record",
+    category: "code",
+    summary: "TypeScript's Record utility is perfect for objects where the keys follow a specific set.",
+    bullets: [
+      "Use Record<K, T> to define keys of type K and values of type T.",
+      "It makes your intent clear and provides full autocompletion.",
+      "Pairs beautifully with union types or enums."
+    ],
+    snippet: `type Status = 'active' | 'inactive';\nconst counts: Record<Status, number> = {\n  active: 10,\n  inactive: 2\n};`
   }
 ];
 
@@ -158,5 +218,40 @@ export const affirmations: Affirmation[] = [
     text: "I navigate tools, teams, and branch drama with polish. My growth is real, and I am allowed to take up space.",
     mantra: "I am building a career with intention and style.",
     lessonId: "lesson-git-switch"
+  },
+  {
+    id: "affirm-learning-2",
+    topic: "learning",
+    text: "I am a methodical explorer of the codebase. Every new concept I grasp adds a new layer to my technical foundation.",
+    mantra: "My curiosity is my greatest competitive advantage.",
+    lessonId: "lesson-css-has"
+  },
+  {
+    id: "affirm-feedback-2",
+    topic: "feedback",
+    text: "I approach reviews with Bestie Energy. I see the collaborative effort in every comment and the growth in every change request.",
+    mantra: "We build better software when we build together.",
+    lessonId: "lesson-pr-bestie"
+  },
+  {
+    id: "affirm-debugging-2",
+    topic: "debugging",
+    text: "I am the master of my environment. I optimize my workflow to clear the path for my most creative and difficult work.",
+    mantra: "I build tools that build my success.",
+    lessonId: "lesson-aliases"
+  },
+  {
+    id: "affirm-career-2",
+    topic: "career",
+    text: "My work creates visible impact. I own my narrative and celebrate the progress I make every single day.",
+    mantra: "I am my own best advocate.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-confidence-2",
+    topic: "confidence",
+    text: "I trust my intuition and my types. I am capable of solving complex problems with precision and poise.",
+    mantra: "My competence is constant and growing.",
+    lessonId: "lesson-ts-record"
   }
 ];

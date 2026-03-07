@@ -38,41 +38,69 @@ const miniAffirmationTemplates = [
   "You showed range today. Shipping counts, even when it felt messy.",
   "That win was not luck. It was skill, judgment, and follow-through.",
   "Your consistency is building technical confidence in real time.",
-  "You made progress today, and progress is what compounds."
+  "You made progress today, and progress is what compounds.",
+  "You handled that technical ambiguity with serious poise.",
+  "Your perspective added value to the discussion today.",
+  "You are navigating your career with intention and style.",
+  "Small technical wins are the bricks that build great careers."
 ];
 
 const journalPrompts = [
   "I explained my thinking clearly when...",
   "I stayed calm and debugged...",
   "Something I learned faster today was...",
-  "A moment I should give myself credit for is..."
+  "A moment I should give myself credit for is...",
+  "I advocated for my technical approach by...",
+  "I helped a teammate unblock themselves when...",
+  "A complex concept that finally clicked today was...",
+  "I prioritized my deep work today by..."
 ];
 
 const ritualByTopic = {
   confidence: [
     "Read the affirmation out loud once.",
     "Pick one moment today where you will speak first.",
-    "Carry the lesson phrasing into your next meeting."
+    "Carry the lesson phrasing into your next meeting.",
+    "Write down one technical thing you explained well today.",
+    "Strike a power pose before your next high-stakes call.",
+    "Recall a time you fixed a 'unfixable' bug.",
+    "Compliment a teammate on their technical logic today."
   ],
   learning: [
     "Read the affirmation and underline the skill word that fits today.",
     "Choose one tiny concept to practice for ten focused minutes.",
-    "Save the lesson snippet somewhere you will reuse it."
+    "Save the lesson snippet somewhere you will reuse it.",
+    "Explain a new concept to a 'rubber duck' or a non-tech friend.",
+    "Read one page of documentation for a tool you use every day.",
+    "Identify one 'magic' part of your stack and look under the hood.",
+    "Write a 3-sentence summary of one thing you learned today."
   ],
   feedback: [
     "Take a breath before attaching meaning to critique.",
     "Turn the note into one clear follow-up question.",
-    "Write down the exact improvement you want to make next."
+    "Write down the exact improvement you want to make next.",
+    "Celebrate the fact that someone cared enough to review your work.",
+    "Find one positive piece of feedback and save it in your brag doc.",
+    "Ask for feedback on a specific part of your code you're unsure about.",
+    "Give someone else high-quality, supportive feedback today."
   ],
   debugging: [
     "Read the affirmation slowly and commit to staying methodical.",
     "Reduce the bug to one reproducible case.",
-    "Use the lesson trick before you escalate the problem."
+    "Use the lesson trick before you escalate the problem.",
+    "Take a 5-minute screen break if the logic isn't flowing.",
+    "Explain the bug out loud to see if the gap becomes obvious.",
+    "Check your assumptions—is the server actually running?",
+    "Check the logs for one specific keyword you usually ignore."
   ],
   career: [
     "Read the affirmation and picture one room you belong in.",
     "Choose one action that makes your work more visible.",
-    "Use the lesson to remove friction from your workflow."
+    "Use the lesson to remove friction from your workflow.",
+    "Reach out to one person whose work you admire for a 15-min chat.",
+    "Update your LinkedIn or portfolio with one recent win.",
+    "Block out 'focus time' on your calendar for deep technical work.",
+    "Read back through your brag document to remind yourself of your range."
   ]
 } as const;
 
@@ -152,7 +180,19 @@ const App = () => {
   const isClaimed = claimedDay === dailyPair.dayKey;
   const journalAffirmation =
     miniAffirmationTemplates[entries.length % miniAffirmationTemplates.length];
-  const ritualSteps = ritualByTopic[dailyPair.affirmation.topic];
+  
+  const ritualSteps = useMemo(() => {
+    const allSteps = ritualByTopic[dailyPair.affirmation.topic];
+    const dayHash = dailyPair.dayKey.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    // Pick 3 steps deterministically based on the date
+    return [
+      allSteps[dayHash % allSteps.length],
+      allSteps[(dayHash + 1) % allSteps.length],
+      allSteps[(dayHash + 2) % allSteps.length]
+    ];
+  }, [dailyPair.affirmation.topic, dailyPair.dayKey]);
+
   const archiveCards = affirmations
     .filter((entry) => entry.id !== dailyPair.affirmation.id)
     .slice(0, 3);

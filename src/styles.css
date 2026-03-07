@@ -50,60 +50,150 @@ body {
     linear-gradient(180deg, var(--bg) 0%, var(--bg-strong) 100%);
 }
 
+/* --- MODERN DARK MODE OVERHAUL --- */
 body.dark-mode {
-  --bg: #05030b;
-  --bg-strong: #140427;
-  --surface: rgba(16, 11, 32, 0.92);
-  --surface-strong: rgba(20, 13, 38, 0.95);
-  --surface-soft: rgba(28, 18, 48, 0.9);
-  --text: #f7edf7;
-  --muted: #c5b7d3;
-  --line: rgba(138, 98, 163, 0.4);
-  --accent: #ff8ed6;
-  --accent-strong: #ff52b1;
-  --accent-soft: rgba(255, 116, 196, 0.08);
-  --accent-soft-strong: rgba(255, 149, 210, 0.18);
-  --glow: rgba(255, 120, 195, 0.35);
-  background:
-    radial-gradient(ellipse 80% 50% at 15% 15%, rgba(255, 255, 255, 0.2), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 5%, rgba(255, 112, 189, 0.25), transparent),
-    linear-gradient(180deg, #0b0412 0%, #17012a 100%);
+  --bg: #0a080c;
+  --bg-strong: #000000;
+  --surface: rgba(24, 20, 32, 0.75);
+  --surface-strong: rgba(32, 28, 44, 0.9);
+  --surface-soft: rgba(45, 40, 60, 0.4);
+  --text: #ffffff;
+  --muted: #a19bb8;
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #ff47bc;
+  --accent-strong: #ff1a95;
+  --accent-soft: rgba(255, 71, 188, 0.1);
+  --accent-soft-strong: rgba(255, 71, 188, 0.2);
+  --glow: rgba(255, 71, 188, 0.3);
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  background: 
+    radial-gradient(circle at 10% 10%, rgba(255, 71, 188, 0.08), transparent 40%),
+    radial-gradient(circle at 90% 90%, rgba(147, 51, 234, 0.08), transparent 40%),
+    #080808;
 }
 
-body.dark-mode .card,
 body.dark-mode .hero-card,
+body.dark-mode .card,
 body.dark-mode .mood-panel {
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(46, 26, 77, 0.9), rgba(20, 11, 41, 0.95));
-  border-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 25px 45px rgba(5, 3, 10, 0.6);
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
 }
 
-body.dark-mode .journal-input {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: var(--text);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.04);
+body.dark-mode .card:hover {
+  border-color: rgba(255, 71, 188, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(255, 71, 188, 0.1);
 }
 
-body.dark-mode .mini-card,
-body.dark-mode .snippet-card,
-body.dark-mode .theme-tile,
-body.dark-mode .entry,
-body.dark-mode .generated-note {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.08);
+body.dark-mode .hero-card h1 {
+  background: linear-gradient(to bottom, #fff, #ff47bc);
+  -webkit-background-clip: text;
+  text-shadow: none;
+}
+
+body.dark-mode .primary {
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .primary:hover {
+  background: #ff47bc;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 71, 188, 0.4);
 }
 
 body.dark-mode .secondary,
-body.dark-mode .secondary.tiny {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.25);
+body.dark-mode .prompt-chip {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e2e2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+  backdrop-filter: blur(4px);
 }
 
+body.dark-mode .secondary:hover,
+body.dark-mode .prompt-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+}
+
+body.dark-mode .journal-input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 20px;
+}
+
+body.dark-mode .journal-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+body.dark-mode .journal-input:focus {
+  border-color: #ff47bc;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .step-index {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ff47bc;
+  border: 1px solid rgba(255, 71, 188, 0.2);
+}
+
+body.dark-mode .badge {
+  background: rgba(255, 71, 188, 0.15);
+  color: #ff7be2;
+  border: 1px solid rgba(255, 71, 188, 0.2);
+}
+
+body.dark-mode .eyebrow {
+  background: rgba(255, 255, 255, 0.05);
+  color: #a19bb8;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode pre {
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #d1d1d1;
+}
+
+body.dark-mode .step-card,
+body.dark-mode .mini-card,
+body.dark-mode .archive-card,
+body.dark-mode .entry,
+body.dark-mode .theme-tile,
+body.dark-mode .generated-note {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .theme-tile.active {
+  background: rgba(255, 71, 188, 0.1);
+  border-color: #ff47bc;
+}
+
+body.dark-mode .soft-note {
+  color: #6b7280;
+}
+
+body.dark-mode .hero-ribbon {
+  background: #ff47bc;
+  color: #ffffff;
+  border: none;
+}
+
+body.dark-mode .hero-date {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+/* --- END DARK MODE OVERHAUL --- */
 
 body.theme-clean {
   --bg: #fff8fc;
@@ -1094,3 +1184,4 @@ button:disabled {
   flex-wrap: wrap;
   align-items: center;
 }
+
