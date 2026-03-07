@@ -53,16 +53,13 @@ const parseJsonResponse = async (response: Response) => {
   return JSON.parse(match[0]);
 };
 
-export const config = {
-  runtime: "edge"
-};
+interface CFContext {
+  request: Request;
+  env: { GEMINI_API_KEY?: string };
+}
 
-export default async function onRequest(context: { request: Request; env: { GEMINI_API_KEY?: string } }) {
-  const { request, env } = context;
-
-  if (request.method !== "GET") {
-    return jsonResponse({ error: "Method not allowed" }, 405);
-  }
+export const onRequestGet = async (context: CFContext) => {
+  const { env } = context;
 
   const apiKey = env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -110,4 +107,4 @@ export default async function onRequest(context: { request: Request; env: { GEMI
   } catch (error) {
     return jsonResponse({ error: "Failed to parse Gemini response", details: (error as Error).message }, 500);
   }
-}
+};
