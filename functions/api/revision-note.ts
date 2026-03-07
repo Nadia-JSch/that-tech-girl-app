@@ -2,6 +2,7 @@
 
 
 
+
 import notesList from "../../notes/notes.json";
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -66,12 +67,12 @@ export const onRequestGet = async (context: CFContext) => {
   const { env } = context;
 
   // Robustly find the API key even if it has sneaky trailing spaces in the dashboard
-  const apiKey = env.GEMINI_API_KEY || (env as any)["GEMINI_API_KEY "];
+  const apiKey = (env.GEMINI_API_KEY || (env as any)["GEMINI_API_KEY "])?.trim();
 
   if (!apiKey) {
     return jsonResponse({ 
       error: "Missing GEMINI_API_KEY", 
-      message: "Please ensure GEMINI_API_KEY is set in Settings > Build & deployments > Variables and Secrets > Production (check for trailing spaces in the name!)"
+      message: "Please ensure GEMINI_API_KEY is set in Settings > Build & deployments > Variables and Secrets > Production"
     }, 500);
   }
 
@@ -83,12 +84,11 @@ export const onRequestGet = async (context: CFContext) => {
   const chosen = notes[Math.floor(Math.random() * notes.length)];
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         contents: [
