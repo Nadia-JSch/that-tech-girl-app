@@ -85,7 +85,7 @@ export const onRequestGet = async (context: CFContext) => {
   const chosen = notes[Math.floor(Math.random() * notes.length)];
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: {
