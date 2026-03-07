@@ -319,19 +319,6 @@ const App = () => {
 
   return (
     <div className="app-shell">
-      <div className="ambient ambient-left" />
-      <div className="ambient ambient-right" />
-      <div className="ambient ambient-bottom" />
-      <div className="sparkle-field sparkle-one" aria-hidden="true">
-        <span>✦</span>
-        <span>✧</span>
-        <span>✦</span>
-      </div>
-      <div className="sparkle-field sparkle-two" aria-hidden="true">
-        <span>✦</span>
-        <span>✦</span>
-        <span>✧</span>
-      </div>
       <div className="marquee marquee-top" aria-hidden="true">
         <span>bows, bugs, brilliance, backups, boundaries, binaries, bestie energy</span>
       </div>
@@ -343,18 +330,15 @@ const App = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="ornament ornament-top" aria-hidden="true">
-            <span className="bow bow-left">୨୧</span>
-            <span className="bow bow-right">୨୧</span>
-          </div>
           <div className="hero-kicker-row">
-            <span className="hero-ribbon">Pink Debug Diary</span>
+            <div className="eyebrow-row">
+              <span className="hero-ribbon">Pink Debug Diary</span>
+              <span className="eyebrow">୨୧ soft launch</span>
+              <span className="eyebrow">✦ browser princess ✦</span>
+            </div>
             <span className="hero-date">{formatDate(dailyPair.dayKey)}</span>
           </div>
-          <div className="hero-subribbon" aria-hidden="true">
-            <span>୨୧ soft launch energy</span>
-            <span>✦ browser princess ✦</span>
-          </div>
+          
           <h1>That Tech Girl</h1>
           <p className="hero-copy">
             A pocket ritual for women in tech: one hype-up, one practical move, one reminder
@@ -375,9 +359,9 @@ const App = () => {
             </button>
           </div>
           <div className="hero-foot">
-            <span>{generationError || shareMessage || "Curated, glittery rituals with optional AI help."}</span>
+            <span className="eyebrow">{generationError || shareMessage || "Curated, glittery rituals with optional AI help."}</span>
             <button
-              className="secondary tiny"
+              className="secondary"
               type="button"
               onClick={() => setDarkMode((value) => !value)}
               aria-pressed={darkMode}
@@ -393,26 +377,25 @@ const App = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.08, duration: 0.45 }}
         >
-          <div className="panel-lace" aria-hidden="true" />
-          <div className="mood-panel-top">
+          <div>
             <span className="eyebrow">Daily moodboard</span>
-            <div className="mood-panel-badge">
-              <span>Angel mode</span>
-              <span className="theme-dot" />
-            </div>
+            <span className="badge" style={{ marginLeft: '10px' }}>Angel mode</span>
           </div>
+          
           <img
             className="mood-img"
             src="/incredible-suggestion.jpg"
             alt="A cat surrounded by pointing hands with the text 'incredible suggestion'"
           />
+          
           <div className="mood-stat">
             <strong>{dailyPair.lesson.category} focus</strong>
             <span>{displayLessonTitle}</span>
           </div>
+          
           <div className="mood-quote">
-            <span className="eyebrow">Mantra</span>
-            <p>{displayMantra}</p>
+            <strong>Current mantra</strong>
+            <p>"{displayMantra}"</p>
           </div>
         </motion.aside>
       </header>
@@ -425,40 +408,21 @@ const App = () => {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="card-flourish" aria-hidden="true">
-            <span>✦</span>
-            <span>୨୧</span>
-          </div>
           <div className="section-head">
-            <div>
-              <div className="eyebrow-row">
-                <span className="eyebrow">Today&apos;s ritual</span>
-                <span className="eyebrow">{dailyPair.affirmation.topic}</span>
-                <span className="eyebrow">{formatDate(dailyPair.dayKey)}</span>
-              </div>
-              <h2>{displayAffirmation}</h2>
+            <div className="eyebrow-row">
+              <span className="eyebrow">Today&apos;s ritual</span>
+              <span className="eyebrow">{dailyPair.affirmation.topic}</span>
             </div>
+            <h2>{displayAffirmation}</h2>
           </div>
 
-          <div className="ritual-layout">
-            <div className="ritual-steps">
-              {displayRitualSteps.map((step, index) => (
-                <article key={step} className="step-card">
-                  <span className="step-index">0{index + 1}</span>
-                  <p>{renderInlineMarkdown(step)}</p>
-                </article>
-              ))}
-            </div>
-
-            <div className="affirmation-spotlight">
-              <div className="spotlight-glow" />
-              <p className="spotlight-label">Pinned thought</p>
-              <p className="spotlight-mantra">{displayMantra}</p>
-              <p className="spotlight-copy">
-                Use this as your anchor when the room gets noisy, the bug gets weird, or the
-                brief gets vague.
-              </p>
-            </div>
+          <div className="ritual-steps">
+            {displayRitualSteps.map((step, index) => (
+              <article key={step} className="step-card">
+                <span className="step-index">0{index + 1}</span>
+                <p>{renderInlineMarkdown(step)}</p>
+              </article>
+            ))}
           </div>
         </motion.section>
 
@@ -469,36 +433,34 @@ const App = () => {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="card-flourish alt" aria-hidden="true">
-            <span>✧</span>
-            <span>୨୧</span>
-          </div>
-          <div className="section-head compact">
-            <div>
+          <div className="section-head">
+            <div className="eyebrow-row">
               <span className="eyebrow">Glow-up lesson</span>
-              <h2>{displayLessonTitle}</h2>
+              <span className="badge">{dailyPair.lesson.category}</span>
             </div>
-            <span className="badge">{dailyPair.lesson.category}</span>
+            <h2>{displayLessonTitle}</h2>
           </div>
+          
           <p className="section-copy">{displayLessonSummary}</p>
-          <div className="mini-grid">
+          
+          <div className="ritual-steps">
             {displayLessonBullets.map((bullet) => (
-              <article key={bullet} className="mini-card">
-                {renderInlineMarkdown(bullet)}
+              <article key={bullet} className="step-card">
+                <span className="step-index">✦</span>
+                <p>{renderInlineMarkdown(bullet)}</p>
               </article>
             ))}
           </div>
+
           {displaySnippet && (
-            <div className="snippet-card">
-              <div className="snippet-head">
-                <span>Snippet</span>
-                <button className="secondary" type="button" onClick={copySnippet}>
-                  {copiedSnippet ? "Copied" : "Copy"}
-                </button>
-              </div>
+            <div className="mood-stat">
+              <strong>Code Snippet</strong>
               <pre>
                 <code>{displaySnippet}</code>
               </pre>
+              <button className="secondary" type="button" onClick={copySnippet} style={{ marginTop: '10px' }}>
+                {copiedSnippet ? "Copied" : "Copy snippet"}
+              </button>
             </div>
           )}
         </motion.aside>
@@ -510,65 +472,56 @@ const App = () => {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="card-flourish" aria-hidden="true">
-            <span>✧</span>
-            <span>✦</span>
-          </div>
-          <div className="section-head compact">
-            <div>
+          <div className="section-head">
+            <div className="eyebrow-row">
               <span className="eyebrow">Revision flashcard</span>
-              <h2>Quick recall from your notes</h2>
+              {revision && <span className="badge">{revision.topic}</span>}
             </div>
+            <h2>Quick recall from your notes</h2>
+          </div>
+
+          <div className="cta-row">
             <button
-              className="secondary"
+              className="primary"
               type="button"
               onClick={fetchRevisionNote}
               disabled={isLoadingRevision}
             >
-              {isLoadingRevision ? "Loading..." : revision ? "New card" : "Draw a card"}
+              {isLoadingRevision ? "Loading..." : revision ? "Draw new card" : "Start recall session"}
             </button>
           </div>
 
-          {revisionError && <p className="revision-error">{revisionError}</p>}
+          {revisionError && <p className="eyebrow" style={{ color: 'red' }}>{revisionError}</p>}
 
           {revision && (
-            <div className="revision-card">
-              <div className="revision-meta">
-                <span className="badge">{revision.topic}</span>
-                {revisionSource && <span className="badge">{revisionSource}</span>}
-              </div>
-              <p className="revision-question">{revision.question}</p>
+            <div className="mood-stat">
+              <strong>Question from {revisionSource}</strong>
+              <p style={{ fontSize: '1.2rem', fontWeight: '600', margin: '10px 0' }}>{revision.question}</p>
+              
               <button
-                className={showAnswer ? "secondary" : "primary"}
+                className="secondary"
                 type="button"
                 onClick={() => setShowAnswer(!showAnswer)}
               >
                 {showAnswer ? "Hide answer" : "Reveal answer"}
               </button>
+              
               {showAnswer && (
                 <motion.div
-                  className="revision-answer"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px dashed var(--line)' }}
                 >
                   <p>{revision.answer}</p>
                   {revision.codeExample && (
-                    <pre><code>{revision.codeExample}</code></pre>
+                    <pre style={{ marginTop: '15px' }}><code>{revision.codeExample}</code></pre>
                   )}
-                  <div className="revision-tip">
-                    <span className="eyebrow">Remember</span>
-                    <p>{revision.tip}</p>
+                  <div className="badge" style={{ marginTop: '15px' }}>
+                    TIP: {revision.tip}
                   </div>
                 </motion.div>
               )}
             </div>
-          )}
-
-          {!revision && !isLoadingRevision && !revisionError && (
-            <p className="section-copy">
-              Gemini picks a concept from your coding notes and turns it into a flashcard.
-            </p>
           )}
         </motion.section>
 
@@ -579,16 +532,11 @@ const App = () => {
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="card-flourish" aria-hidden="true">
-            <span>✦</span>
-            <span>♡</span>
+          <div className="section-head">
+            <span className="eyebrow">Log a win</span>
+            <h2>What moved because you showed up?</h2>
           </div>
-          <div className="section-head compact">
-            <div>
-              <span className="eyebrow">Log a win</span>
-              <h2>What moved because you showed up?</h2>
-            </div>
-          </div>
+
           <div className="prompt-row">
             {journalPrompts.map((prompt) => (
               <button key={prompt} className="prompt-chip" type="button" onClick={() => usePrompt(prompt)}>
@@ -596,101 +544,40 @@ const App = () => {
               </button>
             ))}
           </div>
+
           <textarea
             className="journal-input"
-            placeholder="Deployed my first feature, asked a sharper question in standup, fixed a weird CSS issue..."
+            placeholder="Deployed my first feature, fixed a weird CSS issue..."
             value={journalText}
             onChange={(event) => setJournalText(event.target.value)}
           />
+
           <div className="cta-row">
             <button className="primary" type="button" onClick={saveJournal}>
-              Save win
+              Save technical win
             </button>
-            <span className="soft-note">Local-first. Your notes stay in this browser.</span>
+            <span className="eyebrow">Local-first storage active</span>
           </div>
-          <div className="generated-note">
-            <span className="eyebrow">Mini-affirmation</span>
+
+          <div className="mood-quote" style={{ marginTop: '20px' }}>
+            <strong>Your logic is solid</strong>
             <p>{journalAffirmation}</p>
           </div>
-          <div className="entries">
-            {entries.length === 0 ? (
-              <article className="entry empty">Your win log is empty. Start with one specific sentence.</article>
-            ) : (
-              entries.slice(0, 4).map((entry) => (
-                <article key={`${entry.createdAt}-${entry.text}`} className="entry">
-                  <span>{entry.createdAt}</span>
-                  <p>{entry.text}</p>
-                </article>
-              ))
-            )}
-          </div>
-        </motion.section>
 
-        <motion.section
-          className="card archive-stage"
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.45 }}
-        >
-          <div className="card-flourish alt" aria-hidden="true">
-            <span>✧</span>
-            <span>♡</span>
-          </div>
-          <div className="section-head compact">
-            <div>
-              <span className="eyebrow">More energy</span>
-              <h2>Other affirmations in the rotation</h2>
-            </div>
-          </div>
-          <div className="archive-grid">
-            {archiveCards.map((entry) => (
-              <article key={entry.id} className="archive-card">
-                <span className="badge">{entry.topic}</span>
-                <p>{entry.mantra}</p>
+          <div className="ritual-steps" style={{ marginTop: '20px' }}>
+            {entries.slice(0, 3).map((entry) => (
+              <article key={`${entry.createdAt}-${entry.text}`} className="step-card">
+                <span className="eyebrow">{entry.createdAt}</span>
+                <p>{entry.text}</p>
               </article>
-            ))}
-          </div>
-        </motion.section>
-
-        <motion.section
-          className="card settings-stage"
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.45 }}
-        >
-          <div className="card-flourish" aria-hidden="true">
-            <span>୨୧</span>
-            <span>✦</span>
-          </div>
-          <div className="section-head compact">
-            <div>
-              <span className="eyebrow">Personalize it</span>
-              <h2>Choose your palette and app mode</h2>
-            </div>
-          </div>
-
-          <div className="theme-grid">
-            {themeOrder.map((themeKey) => (
-              <button
-                key={themeKey}
-                className={themeKey === theme ? "theme-tile active" : "theme-tile"}
-                type="button"
-                onClick={() => setTheme(themeKey)}
-              >
-                <strong>{themes[themeKey].name}</strong>
-                <span>{themes[themeKey].description}</span>
-              </button>
             ))}
           </div>
         </motion.section>
       </main>
 
       <footer className="app-footer">
-        <span className="footer-bow" aria-hidden="true">୨୧</span>
-        <p>Built with chaotic femme energy.</p>
-        <span className="footer-bow" aria-hidden="true">୨୧</span>
+        <p>/* build version 1.0.42 -- successfully deployed -- bestie energy active */</p>
+        <p style={{ marginTop: '10px' }}>୨୧ that tech girl ୨୧</p>
       </footer>
     </div>
   );
