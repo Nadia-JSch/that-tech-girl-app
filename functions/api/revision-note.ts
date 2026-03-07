@@ -98,8 +98,7 @@ export const onRequestGet = async (context: CFContext) => {
           }
         ],
         generation_config: {
-          temperature: 0.7,
-          response_mime_type: "application/json"
+          temperature: 0.7
         }
       })
     }
