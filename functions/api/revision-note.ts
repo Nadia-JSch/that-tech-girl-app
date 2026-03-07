@@ -1,6 +1,7 @@
 
 
 
+
 import notesList from "../../notes/notes.json";
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -96,9 +97,9 @@ export const onRequestGet = async (context: CFContext) => {
             parts: [{ text: buildRevisionPrompt(chosen.content, chosen.filename) }]
           }
         ],
-        generationConfig: {
+        generation_config: {
           temperature: 0.7,
-          responseMimeType: "application/json"
+          response_mime_type: "application/json"
         }
       })
     }

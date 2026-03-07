@@ -93,9 +93,9 @@ export const onRequestPost = async (context: CFContext) => {
             parts: [{ text: buildPrompt(body) }]
           }
         ],
-        generationConfig: {
+        generation_config: {
           temperature: 0.9,
-          responseMimeType: "application/json"
+          response_mime_type: "application/json"
         }
       })
     }
