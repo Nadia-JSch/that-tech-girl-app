@@ -40,34 +40,26 @@ Rules:
 - snippet: either a short code snippet or a short workplace phrase
 - align the lesson to the same topic as the affirmation`;
 
-const parseJsonResponse = async (response: Response) => {
-  const data = await response.json();
-  const rawText =
-    data.candidates?.[0]?.content?.parts?.map((part: Record<string, any>) => part.text || "").join("") ?? "";
-  const match = rawText.match(/\{[\s\S]*\}/);
-
-  if (!match) {
-    throw new Error("Gemini did not return parseable JSON.");
-  }
-
+const parseJsonResponse = (text: string) => {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("Groq did not return parseable JSON.");
   return JSON.parse(match[0]);
 };
 
 interface CFContext {
   request: Request;
-  env: { GEMINI_API_KEY?: string };
+  env: { GROQ_API_KEY?: string };
 }
 
 export const onRequestPost = async (context: CFContext) => {
   const { request, env } = context;
 
-  // Robustly find the API key even if it has sneaky trailing spaces in the dashboard
-  const apiKey = (env.GEMINI_API_KEY || (env as any)["GEMINI_API_KEY "])?.trim();
+  const apiKey = env.GROQ_API_KEY?.trim();
 
   if (!apiKey) {
-    return jsonResponse({ 
-      error: "Missing GEMINI_API_KEY", 
-      message: "Please ensure GEMINI_API_KEY is set in Settings > Build & deployments > Variables and Secrets > Production"
+    return jsonResponse({
+      error: "Missing GROQ_API_KEY",
+      message: "Please ensure GROQ_API_KEY is set in Settings > Environment Variables > Production"
     }, 500);
   }
 
@@ -78,36 +70,30 @@ export const onRequestPost = async (context: CFContext) => {
     experienceLevel: typeof payload.experienceLevel === "string" ? payload.experienceLevel : "early-career"
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: buildPrompt(body) }]
-          }
-        ],
-        generation_config: {
-          temperature: 0.9
-        }
-      })
-    }
-  );
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.9,
+      messages: [{ role: "user", content: buildPrompt(body) }]
+    })
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
-    return jsonResponse({ error: "Gemini request failed", details: errorText }, response.status);
+    return jsonResponse({ error: "Groq request failed", details: errorText }, response.status);
   }
 
   try {
-    const content = await parseJsonResponse(response);
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content ?? "";
+    const content = parseJsonResponse(text);
     return jsonResponse({ content });
   } catch (error) {
-    return jsonResponse({ error: "Failed to parse Gemini response", details: (error as Error).message }, 500);
+    return jsonResponse({ error: "Failed to parse Groq response", details: (error as Error).message }, 500);
   }
 };
