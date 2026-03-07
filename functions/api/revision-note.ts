@@ -63,14 +63,13 @@ interface CFContext {
 export const onRequestGet = async (context: CFContext) => {
   const { env } = context;
 
-  const apiKey = env.GEMINI_API_KEY;
+  // Robustly find the API key even if it has sneaky trailing spaces in the dashboard
+  const apiKey = env.GEMINI_API_KEY || (env as any)["GEMINI_API_KEY "];
+
   if (!apiKey) {
-    const keys = Object.keys(env);
-    console.error("Missing GEMINI_API_KEY. Available env keys:", keys);
     return jsonResponse({ 
       error: "Missing GEMINI_API_KEY", 
-      envKeys: keys,
-      message: "Please ensure GEMINI_API_KEY is set in Settings > Build & deployments > Variables and Secrets > Production"
+      message: "Please ensure GEMINI_API_KEY is set in Settings > Build & deployments > Variables and Secrets > Production (check for trailing spaces in the name!)"
     }, 500);
   }
 
