@@ -1,0 +1,112 @@
+const buildPrompt = ({ theme, topic, experienceLevel }: Record<string, string>) => `You are writing content for a hyper-feminine but smart women-in-tech PWA.
+
+Brand voice:
+- playful, glossy, over-the-top, coquette, a little ironic
+- still technically credible and useful
+- never patronizing, vague, or cringe
+- keep output concise
+
+Task:
+Generate one daily affirmation ritual and one matching micro-lesson.
+
+Inputs:
+- theme: ${theme}
+- topic: ${topic}
+- experience level: ${experienceLevel}
+
+Return JSON only with this exact shape:
+{
+  "affirmation": "string",
+  "mantra": "string",
+  "lessonTitle": "string",
+  "lessonSummary": "string",
+  "bullets": ["string", "string", "string"],
+  "snippet": "string",
+  "ritualSteps": ["string", "string", "string"]
+}
+
+Rules:
+- affirmation: 1-2 sentences
+- mantra: short and punchy
+- lesson: practical and technically correct
+- bullets: exactly 3
+- ritualSteps: exactly 3
+- snippet: either a short code snippet or a short workplace phrase
+- align the lesson to the same topic as the affirmation`;
+
+const parseJsonResponse = async (response: Response) => {
+  const data = await response.json();
+  const rawText =
+    data.candidates?.[0]?.content?.parts?.map((part: Record<string, any>) => part.text || "").join("") ?? "";
+  const match = rawText.match(/\{[\s\S]*\}/);
+
+  if (!match) {
+    throw new Error("Gemini did not return parseable JSON.");
+  }
+
+  return JSON.parse(match[0]);
+};
+
+export const config = {
+  runtime: "edge"
+};
+
+export default async function onRequest(context: { request: Request; env: { GEMINI_API_KEY?: string } }) {
+  const { request, env } = context;
+
+  if (request.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+  }
+
+  const apiKey = env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: "Missing GEMINI_API_KEY" }), { status: 500 });
+  }
+
+  const payload = await request.json().catch(() => ({}));
+  const body = {
+    theme: typeof payload.theme === "string" ? payload.theme : "coquette-compiler",
+    topic: typeof payload.topic === "string" ? payload.topic : "confidence",
+    experienceLevel: typeof payload.experienceLevel === "string" ? payload.experienceLevel : "early-career"
+  };
+
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: buildPrompt(body) }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.9,
+          responseMimeType: "application/json"
+        }
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    return new Response(JSON.stringify({ error: "Gemini request failed", details: errorText }), {
+      status: response.status
+    });
+  }
+
+  try {
+    const content = await parseJsonResponse(response);
+    return new Response(JSON.stringify({ content }), { status: 200 });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: "Failed to parse Gemini response", details: (error as Error).message }),
+      { status: 500 }
+    );
+  }
+};
