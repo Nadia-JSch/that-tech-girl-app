@@ -4,7 +4,7 @@ const jsonResponse = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" }
   });
 
-const buildPrompt = ({ theme, topic, experienceLevel }: Record<string, string>) => `You are writing content for a women-in-tech PWA.
+const buildPrompt = ({ theme, topic, experienceLevel }: Record<string, string>) => `You are writing content for a beginner women-in-tech PWA.
 
 Brand voice:
 - confident, professional, empowering

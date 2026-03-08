@@ -45,6 +45,74 @@ const miniAffirmationTemplates = [
   "Small technical wins are the bricks that build great careers."
 ];
 
+const loadingMessages = [
+  "Consulting the cosmos...",
+  "Channeling goddess energy...",
+  "Aligning your stars...",
+  "The universe is listening...",
+  "Manifesting your success...",
+  "The compile gods are pondering...",
+  "Aligning your vibes..."
+];
+
+const journalCompliments = [
+  "The compile gods are pleased.",
+  "Your code is giving main character energy.",
+  "This ship has been logged in the universe.",
+  "The stack overflowed with joy.",
+  "Your git history just got more interesting.",
+  "The PR gods have accepted this offering.",
+  "Your branch was merged successfully.",
+  "This win has been committed to memory.",
+  "The algorithm is shook."
+];
+
+const footerMessages = [
+  "/* running on caffeine and good intentions */",
+  "/* built with sparkle motion and chaos */",
+  "/* vibes: immaculate, code: questionable */",
+  "/* this app is giving main character */",
+  "/* dont let the console logs bite */",
+  "/* literally vibrating with potential */",
+  "/* bestie energy: ACTIVE */",
+  "/* the documentation said no but we did it anyway */"
+];
+
+const vibeCheckResponses = [
+  "The vibes are immaculate, queen.",
+  "We're glitching but we're coping.",
+  "The universe says: yes, obviously.",
+  "Your aura is pixel-perfect.",
+  "Serving main character energy.",
+  "The algorithm is shook but in a good way.",
+  "Vibes: certified baddie.",
+  "Cosmic approval: granted."
+];
+
+const bugSprayResponses: Record<string, string> = {
+  "meeting": "MEETING ELIMINATED. The docs said no but we did it anyway.",
+  "meetings": "MEETINGS: GONE. Your calendar is now pristine. You're welcome.",
+  "slack": "SLACK NOTIFICATIONS: OBLITERATED. Peace has been restored to your mental state.",
+  "slack notifications": "NOTIFICATIONS: VAPORIZED. Your phone can sleep now.",
+  "tech debt": "TECH DEBT: SPRAYED INTO OBLIVION. The code gods are shook.",
+  "bugs": "BUGS: EXTERMINATED. Another one bites the dust.",
+  "bug": "BUG: TERMINATED. Your code is now 100% less buggy.",
+  "imposter syndrome": "IMPOSTER SYNDROME: INVALIDATED. You belong here. That's final.",
+  "procrastination": "PROCRASTINATION: GONE. Your productivity just leveled up.",
+  "burnout": "BURNOUT: SPRAYED AWAY. Self-care has entered the chat.",
+  "friday": "FRIDAY FEELINGS: ACTIVATED. The weekend is near.",
+  "monday": "MONDAY MOODS: ELIMINATED. You're built for this.",
+  "pull request": "PR REVIEW: COMPLETED. The merge is imminent.",
+  "merge conflict": "MERGE CONFLICT: DISSOLVED. Git is now your servant.",
+  "deployment": "DEPLOYMENT: SUCCESS. Ship it and dip.",
+  "debugging": "DEBUGGING: DONE. The bug never stood a chance.",
+  "deadline": "DEADLINE: EXTENDED (mentally). You've got this.",
+  "performance issue": "PERFORMANCE: OPTIMIZED. It goes brrrrr now.",
+  "memory leak": "MEMORY LEAK: PATCHED. Your RAM can finally rest.",
+  "null pointer": "NULL POINTER: HANDLED. The undefined is now defined.",
+  "default": "SPRAYED AND DISMISSED. That thing doesn't stand a chance."
+};
+
 const journalPrompts = [
   "I explained my thinking clearly when...",
   "I stayed calm and debugged...",
@@ -141,6 +209,10 @@ const App = () => {
   const [isLoadingRevision, setIsLoadingRevision] = useState(false);
   const [revisionError, setRevisionError] = useState("");
   const [showAnswer, setShowAnswer] = useState(false);
+  const [vibeMessage, setVibeMessage] = useState("");
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const [sprayInput, setSprayInput] = useState("");
+  const [sprayResult, setSprayResult] = useState("");
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(storageKeys.theme) as ThemeKey | null;
@@ -224,6 +296,8 @@ const App = () => {
       ...entries
     ]);
     setJournalText("");
+    const compliment = journalCompliments[Math.floor(Math.random() * journalCompliments.length)];
+    setShareMessage(compliment);
   };
 
   const shareDailyCard = async () => {
@@ -263,6 +337,14 @@ const App = () => {
     }
   };
 
+  const handleBugSpray = () => {
+    if (!sprayInput.trim()) return;
+    const normalized = sprayInput.toLowerCase().trim();
+    const response = bugSprayResponses[normalized] || bugSprayResponses["default"];
+    setSprayResult(response);
+    setSprayInput("");
+  };
+
   const usePrompt = (prompt: string) => {
     setJournalText((current) => (current ? `${current}\n${prompt} ` : `${prompt} `));
   };
@@ -294,6 +376,7 @@ const App = () => {
   const generateWithGemini = async () => {
     setIsGenerating(true);
     setGenerationError("");
+    setLoadingMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
 
     try {
       const response = await fetch("/api/generate-daily", {
@@ -317,16 +400,21 @@ const App = () => {
       }
 
       setGenerated(data.content);
-      setShareMessage("AI ritual generated for today.");
+      setShareMessage("Your new ritual has been manifested.");
     } catch (error) {
-      setGenerationError(error instanceof Error ? error.message : "Generation failed.");
+      setGenerationError(error instanceof Error ? error.message : "The universe said no.");
     } finally {
       setIsGenerating(false);
+      setLoadingMessage("");
     }
   };
 
   return (
     <div className="app-shell">
+      <span className="sticker sticker-1">✨</span>
+      <span className="sticker sticker-2">💖</span>
+      <span className="sticker sticker-3">⭐</span>
+      <span className="sticker sticker-4">🦄</span>
       <div className="marquee marquee-top" aria-hidden="true">
         <span>bows, bugs, brilliance, backups, boundaries, binaries, bestie energy</span>
       </div>
@@ -381,7 +469,7 @@ const App = () => {
               aria-pressed={darkMode}
               style={{ flexShrink: 0 }}
             >
-              {darkMode ? "Glow softly" : "Midnight mode"}
+              {darkMode ? "Light mode" : "Dark mode"}
             </button>
           </div>
           
@@ -400,6 +488,18 @@ const App = () => {
             <strong>Current mantra</strong>
             <p>"{displayMantra}"</p>
           </div>
+
+          <button
+            className="secondary tiny"
+            type="button"
+            onClick={() => {
+              setVibeMessage(vibeCheckResponses[Math.floor(Math.random() * vibeCheckResponses.length)]);
+            }}
+            style={{ marginTop: '12px', width: '100%' }}
+          >
+            Check my vibe
+          </button>
+          {vibeMessage && <p className="eyebrow" style={{ marginTop: '8px', textAlign: 'center' }}>{vibeMessage}</p>}
         </motion.aside>
       </header>
 
@@ -422,7 +522,7 @@ const App = () => {
 
           <div className="cta-row">
             <button className="secondary" type="button" onClick={generateWithGemini} disabled={isGenerating}>
-              {isGenerating ? "Generating..." : "✦ AI remix"}
+              {isGenerating ? (loadingMessage || "Consulting the cosmos...") : "✦ AI remix"}
             </button>
             {generationError && <span className="eyebrow" style={{ color: 'var(--accent-strong)' }}>{generationError}</span>}
           </div>
@@ -608,6 +708,49 @@ const App = () => {
         </motion.section>
 
         <motion.section
+          className="card bug-spray-stage"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45 }}
+        >
+          <div className="section-head">
+            <span className="eyebrow">Emergency Bug Spray</span>
+            <h2>Spray away your technical annoyances</h2>
+          </div>
+
+          <p className="section-copy">
+            Having a rough day? Type what's bothering you and hit spray. Watch it disappear (metaphorically).
+          </p>
+
+          <div className="spray-input-row">
+            <input
+              type="text"
+              className="spray-input"
+              placeholder="meetings, tech debt, bugs..."
+              value={sprayInput}
+              onChange={(e) => setSprayInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleBugSpray()}
+            />
+            <button className="primary spray-btn" type="button" onClick={handleBugSpray}>
+              🦋 spray
+            </button>
+          </div>
+
+          {sprayResult && (
+            <motion.div
+              className="spray-result"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <span className="spray-emoji">💨</span>
+              <p>{sprayResult}</p>
+            </motion.div>
+          )}
+        </motion.section>
+
+        <motion.section
           className="card settings-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -638,7 +781,7 @@ const App = () => {
       </main>
 
       <footer className="app-footer">
-        <p>/* build version 1.0.42 -- successfully deployed -- bestie energy active */</p>
+        <p>{footerMessages[Math.floor(Math.random() * footerMessages.length)]}</p>
         <p style={{ marginTop: '10px' }}>
           <a href="https://www.pgofcode.co.za/" target="_blank" rel="noopener noreferrer">୨୧ pg of code ୨୧</a>
         </p>
