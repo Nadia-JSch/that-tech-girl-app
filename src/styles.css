@@ -480,6 +480,80 @@ h2 {
   opacity: 0.4;
 }
 
+.hero-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px dashed var(--line);
+}
+
+.hero-foot .eyebrow {
+  max-width: 60%;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* THEME SELECTORS RESTORATION */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.theme-tile {
+  background: var(--bg-strong);
+  border: 1.5px solid var(--line);
+  padding: 20px;
+  border-radius: var(--radius-inner);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-tile:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  background: var(--surface-strong);
+}
+
+.theme-tile.active {
+  border-color: var(--accent-strong);
+  background: var(--surface-strong);
+  box-shadow: 0 0 20px var(--line);
+}
+
+.theme-tile.active::after {
+  content: "୨୧";
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 14px;
+  color: var(--accent-strong);
+}
+
+.theme-tile strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.theme-tile span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
 .app-footer {
   margin-top: 100px;
   padding: 40px;
@@ -488,6 +562,17 @@ h2 {
   font-size: 11px;
   color: var(--muted);
   border-top: 1px dashed var(--line);
+}
+
+.app-footer a {
+  color: var(--accent-strong);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
+  opacity: 0.8;
 }
 
 /* MOBILE */

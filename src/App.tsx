@@ -577,7 +577,9 @@ const App = () => {
 
       <footer className="app-footer">
         <p>/* build version 1.0.42 -- successfully deployed -- bestie energy active */</p>
-        <p style={{ marginTop: '10px' }}>୨୧ that tech girl ୨୧</p>
+        <p style={{ marginTop: '10px' }}>
+          <a href="https://www.pgofcode.co.za/" target="_blank" rel="noopener noreferrer">୨୧ pg of code ୨୧</a>
+        </p>
       </footer>
     </div>
   );
