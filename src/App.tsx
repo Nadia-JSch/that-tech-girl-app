@@ -356,7 +356,7 @@ const App = () => {
             </button>
           </div>
           <div className="hero-foot">
-            <span className="eyebrow">{shareMessage || "Curated, glittery rituals with optional AI help."}</span>
+            <span className="eyebrow">{shareMessage || ""}</span>
             <button
               className="secondary"
               type="button"
@@ -411,6 +411,7 @@ const App = () => {
               <span className="eyebrow">{dailyPair.affirmation.topic}</span>
             </div>
             <h2>{displayAffirmation}</h2>
+            <p className="ritual-caption">Curated, glittery rituals with optional AI help.</p>
           </div>
 
           <div className="cta-row">
