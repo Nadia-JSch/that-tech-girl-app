@@ -10,7 +10,13 @@ export type Topic =
   | "learning"
   | "feedback"
   | "debugging"
-  | "career";
+  | "career"
+  | "visibility"
+  | "pacing"
+  | "imposter syndrome"
+  | "mistakes"
+  | "comparison"
+  | "communication";
 
 export type Lesson = {
   id: string;
@@ -62,16 +68,76 @@ export const themes: Record<
 
 export const lessons: Lesson[] = [
   {
-    id: "lesson-console-table",
-    title: "Debug prettier with console.table()",
+    id: "lesson-async-await",
+    title: "Handle async flows cleanly with async/await",
     category: "code",
-    summary: "When arrays of objects get messy in logs, turn them into something skimmable.",
+    summary: "Async JavaScript gets easier when each await has clear error handling and one obvious responsibility.",
     bullets: [
-      "Use it for API responses, form state, or quick QA checks.",
-      "Pick a few key fields first so the table stays readable.",
-      "It is perfect for tiny inspections before you reach for a debugger."
+      "Wrap the smallest meaningful async block in try/catch so failures stay local.",
+      "Await API calls in sequence only when order matters; otherwise reach for Promise.all.",
+      "Name async helpers after the business action, not the transport detail."
     ],
-    snippet: `const rows = users.map(({ name, role, active }) => ({ name, role, active }));\nconsole.table(rows);`
+    snippet: `async function loadProfile(userId) {\n  try {\n    const response = await fetch(\`/api/users/\${userId}\`);\n    return await response.json();\n  } catch (error) {\n    console.error("Failed to load profile", error);\n    throw error;\n  }\n}`
+  },
+  {
+    id: "lesson-communication",
+    title: "Communicate blockers without sounding vague",
+    category: "career",
+    summary: "Clear workplace communication is a technical multiplier because it reduces churn, delay, and bad assumptions.",
+    bullets: [
+      "State what you tried first so your update sounds informed, not passive.",
+      "Name the blocker in one sentence, then ask for the exact missing context or decision.",
+      "Close with the next action you can take once the blocker is removed."
+    ],
+    snippet: `"I checked the API response and the UI mapping, and the mismatch is in the payload shape. Can you confirm whether \`status\` should come back as a string or enum?"`
+  },
+  {
+    id: "lesson-git-flow",
+    title: "Keep your Git flow calm and reversible",
+    category: "tools",
+    summary: "Most Git stress comes from doing too much at once. Small, explicit commands keep you safe.",
+    bullets: [
+      "Pull latest changes before opening a feature branch so your diff starts clean.",
+      "Commit small checkpoints with meaningful messages instead of one giant cleanup commit.",
+      "Use status and diff constantly; they are your safety rails, not just debugging tools."
+    ],
+    snippet: `git switch main\ngit pull\ngit switch -c feature/user-profile-api`
+  },
+  {
+    id: "lesson-api-design",
+    title: "Read API responses before wiring the UI",
+    category: "career",
+    summary: "Frontends break less when you inspect the real payload shape before you start mapping fields into components.",
+    bullets: [
+      "Check whether the API returns arrays, nested objects, or nullable fields before writing JSX.",
+      "Log one real response and compare it to the interface you expected.",
+      "Normalize the response in one place so the rest of your UI stays boring."
+    ],
+    snippet: `const user = {\n  id: payload.id,\n  name: payload.name ?? "Unknown",\n  isActive: payload.status === "active"\n};`
+  },
+  {
+    id: "lesson-crud",
+    title: "Think about CRUD as user actions, not database verbs",
+    category: "code",
+    summary: "CRUD becomes clearer when you map it to what the user is trying to do in the interface.",
+    bullets: [
+      "Create means collecting valid input and sending a POST with the fields that matter.",
+      "Read means fetching and shaping data so the UI can render without guesswork.",
+      "Update and delete should always have visible user feedback so state changes feel trustworthy."
+    ],
+    snippet: `await fetch("/api/tasks/42", {\n  method: "PATCH",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ done: true })\n});`
+  },
+  {
+    id: "lesson-fetch-patterns",
+    title: "Structure fetch calls so the happy path is obvious",
+    category: "code",
+    summary: "Fetch code gets easier to maintain when parsing, validation, and error handling are not all mixed together.",
+    bullets: [
+      "Check response.ok before assuming the payload shape is usable.",
+      "Parse JSON once, then pass normalized data to the rest of the app.",
+      "Throw useful errors so UI code can show meaningful states."
+    ],
+    snippet: `const response = await fetch("/api/projects");\nif (!response.ok) throw new Error("Failed to load projects");\nconst data = await response.json();`
   },
   {
     id: "lesson-feedback",
@@ -83,79 +149,19 @@ export const lessons: Lesson[] = [
       "Ask what good looks like in one concrete example.",
       "Confirm the next iteration point so the ask is bounded."
     ],
-    snippet: `\"Thanks, that helps. What would a strong version of this look like in one example?\"`
-  },
-  {
-    id: "lesson-git-switch",
-    title: "Use git switch for cleaner branch flow",
-    category: "tools",
-    summary: "Modern Git separates branch switching from file restoration.",
-    bullets: [
-      "Create and move in one command with -c.",
-      "It reads more clearly than older checkout habits.",
-      "It reduces mistakes when you only mean to change branches."
-    ],
-    snippet: `git switch -c feature/polish-settings\n# later\ngit switch main`
-  },
-  {
-    id: "lesson-context",
-    title: "Ask for context without sounding uncertain",
-    category: "career",
-    summary: "Direct questions are a strength, especially when they reduce rework.",
-    bullets: [
-      "Frame the question around speed or alignment.",
-      "Ask about constraints, not just preferences.",
-      "Repeat the decision driver back in one sentence."
-    ],
-    snippet: `\"I can move faster with one constraint clarified: is the priority speed, polish, or flexibility?\"`
-  },
-  {
-    id: "lesson-css-minmax",
-    title: "Make responsive cards with minmax()",
-    category: "code",
-    summary: "Grid layouts feel better when the cards decide their own minimum size.",
-    bullets: [
-      "Use auto-fit to fill available space without brittle breakpoints.",
-      "Keep a strong minimum width to preserve hierarchy.",
-      "Pair it with gap and padding tokens so the layout breathes."
-    ],
-    snippet: `.card-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n  gap: 1rem;\n}`
-  },
-  {
-    id: "lesson-css-has",
-    title: "Select parents with :has()",
-    category: "code",
-    summary: "The CSS :has() selector is a 'family selector' that lets you style a parent based on its children.",
-    bullets: [
-      "Style a card differently if it contains an image.",
-      "Highlight a form group if its input is invalid.",
-      "No more 'js-parent-class' hacks needed for simple layout shifts."
-    ],
-    snippet: `.card:has(img) {\n  padding: 0;\n  overflow: hidden;\n}`
+    snippet: `"Thanks, that helps. What would a strong version of this look like in one example?"`
   },
   {
     id: "lesson-pr-bestie",
     title: "Review PRs like a bestie",
-    category: "career",
+    category: "tools",
     summary: "Great code reviews balance technical rigor with genuine encouragement.",
     bullets: [
       "Lead with what you love before suggesting changes.",
       "Use 'we' and 'our' to keep it collaborative.",
-      "Ask questions (e.g., 'What do you think about...?') instead of giving orders."
+      "Ask questions instead of giving orders when there is room for design choice."
     ],
-    snippet: `\"Love the logic here! Quick thought: would extracting this into a helper make it easier to test?\"`
-  },
-  {
-    id: "lesson-aliases",
-    title: "Save time with shell aliases",
-    category: "tools",
-    summary: "Stop typing long commands over and over. Your shell is your personal assistant.",
-    bullets: [
-      "Add aliases to your .zshrc or .bashrc file.",
-      "Shorten 'git status' to 'gs' or 'npm run dev' to 'nd'.",
-      "Include frequent paths like 'alias cdn=\"cd ~/Documents/notes\"'."
-    ],
-    snippet: `alias gs='git status'\nalias gcm='git commit -m'\nalias nrd='npm run dev'`
+    snippet: `"Love the logic here. What do you think about extracting the request mapping into a helper so this component stays smaller?"`
   },
   {
     id: "lesson-brag-doc",
@@ -171,9 +177,9 @@ export const lessons: Lesson[] = [
   },
   {
     id: "lesson-ts-record",
-    title: "Type dynamic objects with Record",
+    title: "Type API lookup objects with Record",
     category: "code",
-    summary: "TypeScript's Record utility is perfect for objects where the keys follow a specific set.",
+    summary: "Record is useful when JavaScript data comes from dynamic API states but your keys still follow a known set.",
     bullets: [
       "Use Record<K, T> to define keys of type K and values of type T.",
       "It makes your intent clear and provides full autocompletion.",
@@ -196,7 +202,7 @@ export const affirmations: Affirmation[] = [
     topic: "learning",
     text: "I absorb knowledge like a pretty little powerhouse. Every tutorial, ticket, and typo is building range.",
     mantra: "Beginner energy is momentum, not weakness.",
-    lessonId: "lesson-css-minmax"
+    lessonId: "lesson-async-await"
   },
   {
     id: "affirm-feedback",
@@ -210,21 +216,21 @@ export const affirmations: Affirmation[] = [
     topic: "debugging",
     text: "I turn bugs into breadcrumbs. I stay calm, trace the pattern, and let the system tell me its secret.",
     mantra: "My patience is part of my technical skill.",
-    lessonId: "lesson-console-table"
+    lessonId: "lesson-fetch-patterns"
   },
   {
     id: "affirm-career",
     topic: "career",
     text: "I navigate tools, teams, and branch drama with polish. My growth is real, and I am allowed to take up space.",
     mantra: "I am building a career with intention and style.",
-    lessonId: "lesson-git-switch"
+    lessonId: "lesson-git-flow"
   },
   {
     id: "affirm-learning-2",
     topic: "learning",
     text: "I am a methodical explorer of the codebase. Every new concept I grasp adds a new layer to my technical foundation.",
     mantra: "My curiosity is my greatest competitive advantage.",
-    lessonId: "lesson-css-has"
+    lessonId: "lesson-crud"
   },
   {
     id: "affirm-feedback-2",
@@ -238,7 +244,7 @@ export const affirmations: Affirmation[] = [
     topic: "debugging",
     text: "I am the master of my environment. I optimize my workflow to clear the path for my most creative and difficult work.",
     mantra: "I build tools that build my success.",
-    lessonId: "lesson-aliases"
+    lessonId: "lesson-api-design"
   },
   {
     id: "affirm-career-2",
@@ -253,5 +259,47 @@ export const affirmations: Affirmation[] = [
     text: "I trust my intuition and my types. I am capable of solving complex problems with precision and poise.",
     mantra: "My competence is constant and growing.",
     lessonId: "lesson-ts-record"
+  },
+  {
+    id: "affirm-visibility",
+    topic: "visibility",
+    text: "I do not have to be the loudest person in the room to be the most valuable. My work speaks clearly when I let it.",
+    mantra: "My impact lands, even when I can't see it.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-pacing",
+    topic: "pacing",
+    text: "Slowness is not failure. It is the way I build understanding that actually holds. I am not behind — I am thorough.",
+    mantra: "I move at the pace of real comprehension.",
+    lessonId: "lesson-async-await"
+  },
+  {
+    id: "affirm-imposter-syndrome",
+    topic: "imposter syndrome",
+    text: "The fact that I keep showing up — and they keep employing me — is evidence. I do not need to earn my place again today.",
+    mantra: "I belong here. That's already been decided.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-mistakes",
+    topic: "mistakes",
+    text: "Making mistakes is part of doing real work. I am someone who tries things, and that is braver than waiting to be perfect.",
+    mantra: "I fix it and keep going. That's what professionals do.",
+    lessonId: "lesson-fetch-patterns"
+  },
+  {
+    id: "affirm-comparison",
+    topic: "comparison",
+    text: "Other people's timelines are not my measure. I am building something that fits my actual life, not a highlight reel.",
+    mantra: "My path is the right shape for me.",
+    lessonId: "lesson-crud"
+  },
+  {
+    id: "affirm-communication",
+    topic: "communication",
+    text: "Asking for clarity is not a sign of incompetence. It is how I make sure I do the work right the first time.",
+    mantra: "Clarity-seeking is a professional skill, not a weakness.",
+    lessonId: "lesson-communication"
   }
 ];

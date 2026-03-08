@@ -21,6 +21,36 @@ Inputs:
 - topic: ${topic}
 - experience level: ${experienceLevel}
 
+Preferred lesson focus:
+- CRUD flows
+- working with APIs
+- async JavaScript patterns
+- Git workflows
+- communication at work
+
+Prefer JavaScript-oriented examples unless the topic is clearly communication-focused.
+
+Supported affirmation topics:
+- confidence
+- learning
+- feedback
+- debugging
+- career
+- visibility
+- pacing
+- imposter syndrome
+- mistakes
+- comparison
+- communication
+
+Topic guidance:
+- visibility: Generate content about quiet, consistent contribution. Do not frame value as being loud or performative. Ritual steps should focus on low-pressure visibility like sharing a small win in standup, leaving a useful note in a doc, or making work easier to find later.
+- pacing: Generate content that validates working at a thoughtful pace. Reframe slowness as depth-building and sustainable, not falling behind. Include practical steps for working without guilt.
+- imposter syndrome: Ground the content in evidence, not vague reassurance. Point to proof like still being employed, still shipping, still learning, or still being trusted with real work. Ritual steps should include concrete evidence-gathering like checking a brag doc or recent wins.
+- mistakes: Treat mistakes as professional data, not character evidence. Use debugging-minded framing for self-perception. Ritual steps should involve naming one specific mistake neutrally and deciding on one repair or prevention step.
+- comparison: Gently interrupt timeline comparison spirals. Focus on the difference between inspiration and measurement. Ritual steps should redirect attention to personal metrics, current season of life, and actual priorities.
+- communication: Reframe asking questions and seeking clarification as a professional strength. Mention that strong engineers and writers ask good questions early. Ritual steps should include one low-stakes communication practice for the day.
+
 Return JSON only with this exact shape:
 {
   "affirmation": "string",
@@ -29,7 +59,18 @@ Return JSON only with this exact shape:
   "lessonSummary": "string",
   "bullets": ["string", "string", "string"],
   "snippet": "string",
-  "ritualSteps": ["string", "string", "string"]
+  "ritualSteps": ["string", "string", "string"],
+  "archiveAffirmations": [
+    { "topic": "string", "mantra": "string" },
+    { "topic": "string", "mantra": "string" },
+    { "topic": "string", "mantra": "string" }
+  ],
+  "inspirationIdeas": [
+    { "label": "string", "title": "string", "description": "string" },
+    { "label": "string", "title": "string", "description": "string" },
+    { "label": "string", "title": "string", "description": "string" },
+    { "label": "string", "title": "string", "description": "string" }
+  ]
 }
 
 Rules:
@@ -38,8 +79,11 @@ Rules:
 - lesson: practical and technically correct
 - bullets: exactly 3, actionable
 - ritualSteps: exactly 3, specific actions
+- archiveAffirmations: exactly 3 distinct extra affirmations that fit the same app voice and can draw from any supported topic, including visibility, pacing, imposter syndrome, mistakes, comparison, and communication
+- inspirationIdeas: exactly 4 concrete, inspiring ideas tied to building with CRUD, APIs, async JS, Git, workplace communication, AI workflows, vibe coding, MCPs, or adjacent emergent tooling
 - snippet: either a short code snippet or a short workplace phrase
-- align the lesson to the same topic as the affirmation`;
+- align the lesson to the same topic as the affirmation
+- keep the tone warm, a little witty, and emotionally honest; this app is for someone who doubts themselves more than they should, so avoid motivational-poster language`;
 
 interface CFContext {
   request: Request;

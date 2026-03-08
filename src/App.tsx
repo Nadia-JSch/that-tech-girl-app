@@ -16,6 +16,15 @@ type GeneratedContent = {
   bullets: string[];
   snippet: string;
   ritualSteps: string[];
+  archiveAffirmations: Array<{
+    topic: string;
+    mantra: string;
+  }>;
+  inspirationIdeas: Array<{
+    label: string;
+    title: string;
+    description: string;
+  }>;
 };
 
 type RevisionNote = {
@@ -26,12 +35,25 @@ type RevisionNote = {
   tip: string;
 };
 
+type CachedDailyContent = {
+  dayKey: string;
+  content: GeneratedContent;
+};
+
+type CachedRevisionCard = {
+  dayKey: string;
+  content: RevisionNote;
+  sourceFile: string;
+};
+
 const themeOrder = Object.keys(themes) as ThemeKey[];
 const storageKeys = {
   theme: "that-tech-girl.theme",
   journal: "that-tech-girl.journal",
   claimed: "that-tech-girl.claimed-day",
-  dark: "that-tech-girl.dark-mode"
+  dark: "that-tech-girl.dark-mode",
+  dailyAi: "that-tech-girl.daily-ai",
+  dailyRevision: "that-tech-girl.daily-revision"
 };
 
 const miniAffirmationTemplates = [
@@ -76,6 +98,33 @@ const footerMessages = [
   "/* literally vibrating with potential */",
   "/* bestie energy: ACTIVE */",
   "/* the documentation said no but we did it anyway */"
+];
+
+const buildIdeas = [
+  {
+    label: "App idea",
+    title: "Build a CRUD studio for your own life",
+    description:
+      "Use your CRUD, API, and async JS practice to build something personal: a job-application tracker, a content planner, a study dashboard, or a bug log that actually feels good to use."
+  },
+  {
+    label: "AI workflow",
+    title: "Design a vibe-coded sidekick with guardrails",
+    description:
+      "Pair AI generation with your own judgment: let the model draft UI states, copy, or test cases, then use JavaScript and Git discipline to shape it into something reliable."
+  },
+  {
+    label: "Emergent tech",
+    title: "Create an MCP-style tool that connects context",
+    description:
+      "As you get better at APIs and communication, you can build small tools that let AI assistants read docs, notes, tickets, or product data with the right permissions and structure."
+  },
+  {
+    label: "Career leverage",
+    title: "Turn communication into technical force multiplication",
+    description:
+      "The same skills you're practicing here can become demos, internal tools, onboarding helpers, PR bots, research assistants, or product prototypes that make teams move faster."
+  }
 ];
 
 const vibeCheckResponses = [
@@ -169,6 +218,60 @@ const ritualByTopic = {
     "Update your LinkedIn or portfolio with one recent win.",
     "Block out 'focus time' on your calendar for deep technical work.",
     "Read back through your brag document to remind yourself of your range."
+  ],
+  visibility: [
+    "Write down one task you completed this week that required real skill.",
+    "Share one small progress update in a place your team already looks.",
+    "Add one useful sentence to a doc, ticket, or handover note.",
+    "Name one quiet contribution you made that kept work moving.",
+    "Finish one task in a way that leaves a clearer trail for the next person.",
+    "Notice where your work is already visible without forcing a performance.",
+    "Pick one low-pressure way to let your work be seen today."
+  ],
+  pacing: [
+    "Name one thing you're understanding more deeply because you did not rush it.",
+    "Break today's work into the smallest step that still counts as real progress.",
+    "Replace one 'I should be faster' thought with a concrete next action.",
+    "Give yourself twenty focused minutes without checking how other people are moving.",
+    "Write down one place where slowing down prevented a bigger mess.",
+    "Choose depth over speed for one part of today's work on purpose.",
+    "End the day by noting what became clearer because you stayed with it."
+  ],
+  "imposter syndrome": [
+    "Open your brag doc, commits, or shipped work and read three pieces of evidence out loud.",
+    "Name one hard thing you handled recently that a newer version of you could not have done.",
+    "Write down one reason you are still trusted with real work here.",
+    "Notice where your brain is making feelings sound like facts and separate the two.",
+    "Ask yourself what proof you would accept from a friend in your exact position.",
+    "List one thing you learned this month that proves you are still growing, not faking it.",
+    "Keep one visible reminder of your own evidence nearby for the rest of the day."
+  ],
+  mistakes: [
+    "Name one mistake from this week in neutral language, without turning it into a personality trait.",
+    "Write what the mistake taught you or clarified, even if the lesson is simply 'slow down here.'",
+    "Decide on one tiny prevention step instead of replaying the whole moment.",
+    "Notice how much energy goes into shame, then redirect some of it into repair.",
+    "Treat one misstep like debugging data: what happened, why, and what changes next time?",
+    "Remember one time you recovered well after getting something wrong.",
+    "Say the sentence 'I made a mistake, and I am still a competent person' once without arguing with it."
+  ],
+  comparison: [
+    "Catch one comparison thought and rewrite it as information, not a verdict.",
+    "Name one metric that actually matters in your life right now.",
+    "Write down one thing you are building that would not show up on someone else's highlight reel.",
+    "Unfollow, mute, or step away from one input that reliably makes you feel behind.",
+    "List two ways your path already fits your real circumstances better than a copied timeline would.",
+    "Pick one personal measure of progress for today and ignore the rest.",
+    "Read back your last three journal entries as if a friend wrote them."
+  ],
+  communication: [
+    "Ask one clarifying question earlier than you usually would.",
+    "Rewrite one vague message so it says what you tried, what you need, and what happens next.",
+    "Practice saying 'I need one more piece of context before I move' without apologizing.",
+    "Notice one moment today where clarity saved time or confusion.",
+    "Write down one question you are avoiding and ask it in the lowest-stakes channel available.",
+    "Name one communication habit that makes your work easier for other people to follow.",
+    "End one update with a direct next step instead of leaving it open-ended."
   ]
 } as const;
 
@@ -200,6 +303,18 @@ const renderInlineMarkdown = (text: string) => {
   });
 };
 
+const readJsonStorage = <T,>(key: string) => {
+  const raw = window.localStorage.getItem(key);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    window.localStorage.removeItem(key);
+    return null;
+  }
+};
+
 const App = () => {
   const dailyPair = useMemo(() => getDailyPair(), []);
   const [theme, setTheme] = useState<ThemeKey>("coquette-compiler");
@@ -209,10 +324,8 @@ const App = () => {
   const [claimedDay, setClaimedDay] = useState("");
   const [shareMessage, setShareMessage] = useState("");
   const [copiedSnippet, setCopiedSnippet] = useState(false);
-  const [copiedMantra, setCopiedMantra] = useState(false);
   const [generated, setGenerated] = useState<GeneratedContent | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationError, setGenerationError] = useState("");
   const [revision, setRevision] = useState<RevisionNote | null>(null);
   const [revisionSource, setRevisionSource] = useState("");
   const [isLoadingRevision, setIsLoadingRevision] = useState(false);
@@ -222,22 +335,21 @@ const App = () => {
   const [loadingMessage, setLoadingMessage] = useState("");
   const [sprayInput, setSprayInput] = useState("");
   const [sprayResult, setSprayResult] = useState("");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(storageKeys.theme) as ThemeKey | null;
-    const savedJournal = window.localStorage.getItem(storageKeys.journal);
+    const savedJournal = readJsonStorage<JournalEntry[]>(storageKeys.journal);
     const savedClaimed = window.localStorage.getItem(storageKeys.claimed);
     const savedDark = window.localStorage.getItem(storageKeys.dark);
+    const savedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
+    const savedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
 
     if (savedTheme && themeOrder.includes(savedTheme)) {
       setTheme(savedTheme);
     }
     if (savedJournal) {
-      try {
-        setEntries(JSON.parse(savedJournal) as JournalEntry[]);
-      } catch {
-        window.localStorage.removeItem(storageKeys.journal);
-      }
+      setEntries(savedJournal);
     }
     if (savedClaimed) {
       setClaimedDay(savedClaimed);
@@ -245,18 +357,50 @@ const App = () => {
     if (savedDark) {
       setDarkMode(savedDark === "true");
     }
+    if (savedDailyAi?.dayKey === dailyPair.dayKey) {
+      setGenerated(savedDailyAi.content);
+    }
+    if (savedRevision?.dayKey === dailyPair.dayKey) {
+      setRevision(savedRevision.content);
+      setRevisionSource(savedRevision.sourceFile);
+    }
+    setIsHydrated(true);
   }, []);
 
+  const isMidnightTheme = theme === "midnight-coder";
+  const effectiveDarkMode = darkMode && !isMidnightTheme;
+
   useEffect(() => {
-    const classes = [themes[theme].surfaceClass, darkMode ? "dark-mode" : ""].filter(Boolean);
+    const classes = [themes[theme].surfaceClass, effectiveDarkMode ? "dark-mode" : ""].filter(Boolean);
     document.body.className = classes.join(" ");
     window.localStorage.setItem(storageKeys.theme, theme);
     window.localStorage.setItem(storageKeys.dark, String(darkMode));
-  }, [theme, darkMode]);
+  }, [theme, darkMode, effectiveDarkMode]);
 
   useEffect(() => {
     window.localStorage.setItem(storageKeys.journal, JSON.stringify(entries));
   }, [entries]);
+
+  useEffect(() => {
+    if (generated) {
+      const payload: CachedDailyContent = {
+        dayKey: dailyPair.dayKey,
+        content: generated
+      };
+      window.localStorage.setItem(storageKeys.dailyAi, JSON.stringify(payload));
+    }
+  }, [dailyPair.dayKey, generated]);
+
+  useEffect(() => {
+    if (revision && revisionSource) {
+      const payload: CachedRevisionCard = {
+        dayKey: dailyPair.dayKey,
+        content: revision,
+        sourceFile: revisionSource
+      };
+      window.localStorage.setItem(storageKeys.dailyRevision, JSON.stringify(payload));
+    }
+  }, [dailyPair.dayKey, revision, revisionSource]);
 
   const isClaimed = claimedDay === dailyPair.dayKey;
   const journalAffirmation =
@@ -274,9 +418,10 @@ const App = () => {
     ];
   }, [dailyPair.affirmation.topic, dailyPair.dayKey]);
 
-  const archiveCards = affirmations
+  const archiveCards = generated?.archiveAffirmations ?? affirmations
     .filter((entry) => entry.id !== dailyPair.affirmation.id)
-    .slice(0, 3);
+    .slice(0, 3)
+    .map((entry) => ({ topic: entry.topic, mantra: entry.mantra }));
   const displayAffirmation = generated?.affirmation ?? dailyPair.affirmation.text;
   const displayMantra = generated?.mantra ?? dailyPair.affirmation.mantra;
   const displayLessonTitle = generated?.lessonTitle ?? dailyPair.lesson.title;
@@ -284,6 +429,28 @@ const App = () => {
   const displayLessonBullets = generated?.bullets ?? dailyPair.lesson.bullets;
   const displaySnippet = generated?.snippet ?? dailyPair.lesson.snippet ?? "";
   const displayRitualSteps = generated?.ritualSteps ?? ritualSteps;
+  const displayInspirationIdeas = generated?.inspirationIdeas ?? buildIdeas;
+  const aiStatusLabel = isGenerating
+    ? loadingMessage || "Loading today's AI ritual..."
+    : generated
+      ? `AI ritual cached for ${formatDate(dailyPair.dayKey)}`
+      : "Preparing today's AI ritual";
+  const aiStatusNote = generated
+    ? "Regenerate ritual overwrites today's cached ideas, lesson, and affirmations."
+    : "The app generates one AI ritual per day and keeps it in local storage.";
+  const themeModeNote = isMidnightTheme
+    ? "Midnight Coder already includes its own dark look."
+    : darkMode
+      ? `${themes[theme].name} with dark mode enabled.`
+      : `${themes[theme].name} with light mode enabled.`;
+  const activeThemeCapability = isMidnightTheme
+    ? "Built-in midnight mode"
+    : effectiveDarkMode
+      ? "Dark mode enabled"
+      : "Light mode enabled";
+  const activeThemeSupportCopy = isMidnightTheme
+    ? "This palette already lives in its own dark world. No extra mode switch needed."
+    : "This palette can switch between light and dark mode, so the vibe stays the same while the lighting changes.";
 
   const claimRitual = () => {
     window.localStorage.setItem(storageKeys.claimed, dailyPair.dayKey);
@@ -336,16 +503,6 @@ const App = () => {
     }
   };
 
-  const copyMantra = async () => {
-    try {
-      await navigator.clipboard.writeText(displayMantra);
-      setCopiedMantra(true);
-      window.setTimeout(() => setCopiedMantra(false), 1600);
-    } catch {
-      setCopiedMantra(false);
-    }
-  };
-
   const handleBugSpray = () => {
     if (!sprayInput.trim()) return;
     const normalized = sprayInput.toLowerCase().trim();
@@ -358,7 +515,18 @@ const App = () => {
     setJournalText((current) => (current ? `${current}\n${prompt} ` : `${prompt} `));
   };
 
-  const fetchRevisionNote = async () => {
+  const fetchRevisionNote = async (force = false) => {
+    if (!force) {
+      const cachedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
+      if (cachedRevision?.dayKey === dailyPair.dayKey) {
+        setRevision(cachedRevision.content);
+        setRevisionSource(cachedRevision.sourceFile);
+        setRevisionError("");
+        setShowAnswer(false);
+        return;
+      }
+    }
+
     setIsLoadingRevision(true);
     setRevisionError("");
     setShowAnswer(false);
@@ -382,9 +550,16 @@ const App = () => {
     }
   };
 
-  const generateWithGemini = async () => {
+  const generateWithGemini = async (force = false) => {
+    if (!force) {
+      const cachedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
+      if (cachedDailyAi?.dayKey === dailyPair.dayKey) {
+        setGenerated(cachedDailyAi.content);
+        return;
+      }
+    }
+
     setIsGenerating(true);
-    setGenerationError("");
     setLoadingMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
 
     try {
@@ -411,12 +586,26 @@ const App = () => {
       setGenerated(data.content);
       setShareMessage("Your new ritual has been manifested.");
     } catch (error) {
-      setGenerationError(error instanceof Error ? error.message : "The universe said no.");
+      setShareMessage(error instanceof Error ? error.message : "The universe said no.");
     } finally {
       setIsGenerating(false);
       setLoadingMessage("");
     }
   };
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const cachedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
+    if (cachedDailyAi?.dayKey !== dailyPair.dayKey && !isGenerating) {
+      void generateWithGemini();
+    }
+
+    const cachedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
+    if (cachedRevision?.dayKey !== dailyPair.dayKey && !isLoadingRevision) {
+      void fetchRevisionNote();
+    }
+  }, [dailyPair.dayKey, isHydrated]);
 
   return (
     <div className="app-shell">
@@ -446,30 +635,39 @@ const App = () => {
           
           <h1>That Tech Girl</h1>
           <p className="hero-copy">
-            {getGreeting()} A pocket ritual for women in tech: one hype-up, one practical move, one reminder
-            that your work is real.
+            {getGreeting()} A daily ritual for women in tech that blends affirmations, practical glow-up
+            lessons, and AI-powered revision cards from your own notes.
           </p>
 
-          <div className="hero-affirmation" style={{ margin: '24px 0' }}>
+          <div className="hero-affirmation">
             <span className="badge">{dailyPair.affirmation.topic}</span>
-            <blockquote style={{ fontSize: '1.25rem', fontStyle: 'italic', margin: '12px 0', color: 'var(--text)', lineHeight: '1.4' }}>
+            <blockquote className="hero-affirmation-quote">
               {displayAffirmation}
             </blockquote>
           </div>
 
-          <div className="hero-actions" style={{ marginBottom: '20px' }}>
+          <div className="hero-actions hero-actions-spaced">
             <button className={isClaimed ? "primary claimed" : "primary"} type="button" onClick={claimRitual}>
               {isClaimed ? "Claimed for today" : "Start the ritual"}
             </button>
             <button className="secondary" type="button" onClick={shareDailyCard}>
               Share today&apos;s card
             </button>
-            <button className="secondary" type="button" onClick={generateWithGemini} disabled={isGenerating}>
-              {isGenerating ? (loadingMessage || "Consulting the cosmos...") : "✦ AI remix"}
+            <button className="secondary" type="button" onClick={() => void generateWithGemini(true)} disabled={isGenerating}>
+              {isGenerating ? (loadingMessage || "Consulting the cosmos...") : "Regenerate ritual"}
             </button>
           </div>
 
-          {shareMessage && <span className="eyebrow" style={{ wordBreak: 'break-word', maxWidth: '100%' }}>{shareMessage}</span>}
+          <div className="hero-foot">
+            <div className="hero-status">
+              <span className="eyebrow eyebrow-wrap">{aiStatusLabel}</span>
+              <p className="hero-status-note">{aiStatusNote}</p>
+            </div>
+            <div className="hero-status">
+              <span className="eyebrow eyebrow-wrap">{themeModeNote}</span>
+              {shareMessage && <span className="eyebrow eyebrow-wrap">{shareMessage}</span>}
+            </div>
+          </div>
         </motion.section>
 
         <motion.aside
@@ -478,17 +676,22 @@ const App = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.08, duration: 0.45 }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <div className="moodboard-head">
             <span className="eyebrow">Daily moodboard</span>
-            <button
-              className="secondary tiny"
-              type="button"
-              onClick={() => setDarkMode((value) => !value)}
-              aria-pressed={darkMode}
-              style={{ flexShrink: 0 }}
-            >
-              {darkMode ? "Light mode" : "Dark mode"}
-            </button>
+            {isMidnightTheme ? (
+              <span className="eyebrow mood-toggle mood-toggle-static">{activeThemeCapability}</span>
+            ) : (
+              <button
+                className="secondary tiny mood-toggle"
+                type="button"
+                onClick={() => {
+                  setDarkMode((value) => !value);
+                }}
+                aria-pressed={effectiveDarkMode}
+              >
+                {effectiveDarkMode ? "Switch to light" : "Switch to dark"}
+              </button>
+            )}
           </div>
           
           <img
@@ -499,26 +702,41 @@ const App = () => {
 
 
           
-          <div 
-            className="mood-stat" 
-            style={{ cursor: 'pointer' }}
-            onClick={() => document.getElementById('daily-protocol')?.scrollIntoView({ behavior: 'smooth' })}
+          <div
+            className="mood-stat mood-stat-link"
+            onClick={() => document.getElementById("glow-up-lesson")?.scrollIntoView({ behavior: "smooth", block: "start" })}
           >
             <strong>{dailyPair.lesson.category} focus</strong>
             <span>{displayLessonTitle}</span>
           </div>
 
+          <div className="mood-quote">
+            <span className="eyebrow">Mantra</span>
+            <p>{displayMantra}</p>
+          </div>
+
           <button
-            className="secondary tiny"
+            className="secondary full-width mood-vibe-button"
             type="button"
             onClick={() => {
               setVibeMessage(vibeCheckResponses[Math.floor(Math.random() * vibeCheckResponses.length)]);
             }}
-            style={{ width: '100%' }}
           >
             Check my vibe
           </button>
-          {vibeMessage && <p className="eyebrow" style={{ marginTop: '8px', textAlign: 'center' }}>{vibeMessage}</p>}
+          <div className="hero-support-card mood-support-compact">
+            <div className="hero-support-copy">
+              <span className="eyebrow">Support familiar</span>
+              <p className="mood-support-message">
+                {vibeMessage || "Your soft little reminder that you can absolutely do this."}
+              </p>
+            </div>
+            <img
+              className="hero-support-img"
+              src="/you-can-do-this-cat.jpg"
+              alt="A cat with a note that says you can do this"
+            />
+          </div>
         </motion.aside>
       </header>
 
@@ -550,6 +768,7 @@ const App = () => {
         </motion.section>
 
         <motion.aside
+          id="glow-up-lesson"
           className="card lesson-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -581,7 +800,7 @@ const App = () => {
               <pre>
                 <code>{displaySnippet}</code>
               </pre>
-              <button className="secondary" type="button" onClick={copySnippet} style={{ marginTop: '10px' }}>
+              <button className="secondary snippet-action" type="button" onClick={copySnippet}>
                 {copiedSnippet ? "Copied" : "Copy snippet"}
               </button>
             </div>
@@ -607,19 +826,19 @@ const App = () => {
             <button
               className="primary"
               type="button"
-              onClick={fetchRevisionNote}
+              onClick={() => void fetchRevisionNote()}
               disabled={isLoadingRevision}
             >
-              {isLoadingRevision ? "Loading..." : revision ? "Draw new card" : "Start recall session"}
+              {isLoadingRevision ? "Loading..." : revision ? "Open today's card" : "Start recall session"}
             </button>
           </div>
 
-          {revisionError && <p className="eyebrow" style={{ color: 'red' }}>{revisionError}</p>}
+          {revisionError && <p className="eyebrow revision-error-chip">{revisionError}</p>}
 
           {revision && (
             <div className="mood-stat">
               <strong>Question from {revisionSource}</strong>
-              <p style={{ fontSize: '1.2rem', fontWeight: '600', margin: '10px 0' }}>{revision.question}</p>
+              <p className="revision-question">{revision.question}</p>
               
               <button
                 className="secondary"
@@ -633,13 +852,13 @@ const App = () => {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px dashed var(--line)' }}
+                  className="revision-answer"
                 >
                   <p>{revision.answer}</p>
                   {revision.codeExample && (
-                    <pre style={{ marginTop: '15px' }}><code>{revision.codeExample}</code></pre>
+                    <pre className="revision-code"><code>{revision.codeExample}</code></pre>
                   )}
-                  <div className="badge" style={{ marginTop: '15px', wordBreak: 'break-word', maxWidth: '100%' }}>
+                  <div className="badge revision-tip-chip">
                     TIP: {revision.tip}
                   </div>
                 </motion.div>
@@ -682,12 +901,12 @@ const App = () => {
             <span className="soft-note">Local-first storage active</span>
           </div>
 
-          <div className="mood-quote" style={{ marginTop: '20px' }}>
+          <div className="mood-quote journal-affirmation">
             <strong>Your logic is solid</strong>
             <p>{journalAffirmation}</p>
           </div>
 
-          <div className="ritual-steps" style={{ marginTop: '20px' }}>
+          <div className="ritual-steps journal-entries">
             {entries.slice(0, 3).map((entry) => (
               <article key={`${entry.createdAt}-${entry.text}`} className="step-card">
                 <span className="eyebrow">{entry.createdAt}</span>
@@ -697,7 +916,7 @@ const App = () => {
           </div>
         </motion.section>
         <motion.section
-          className="card archive-stage"
+          className="card archive-stage chapter-energy"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
@@ -709,11 +928,41 @@ const App = () => {
               <h2>Other affirmations in the rotation</h2>
             </div>
           </div>
-          <div className="archive-grid">
+          <div className="archive-grid archive-energy-grid">
             {archiveCards.map((entry) => (
-              <article key={entry.id} className="archive-card">
+              <article key={`${entry.topic}-${entry.mantra}`} className="archive-card archive-energy-card">
                 <span className="badge">{entry.topic}</span>
                 <p>{entry.mantra}</p>
+              </article>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section
+          className="card inspiration-stage chapter-unlocks"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45 }}
+        >
+          <div className="section-head compact">
+            <div>
+              <span className="eyebrow">What this unlocks</span>
+              <h2>Ways to use the skills you're building</h2>
+            </div>
+          </div>
+          <p className="section-copy">
+            These lessons are not just for getting through tickets. They are the foundation for building useful apps,
+            sharper AI workflows, and more ambitious technical experiments.
+          </p>
+          <div className="archive-grid inspiration-grid">
+            {displayInspirationIdeas.map((idea) => (
+              <article key={idea.title} className="archive-card inspiration-card">
+                <span className="badge">{idea.label}</span>
+                <p>{idea.title}</p>
+                <span className="soft-note inspiration-copy">
+                  {idea.description}
+                </span>
               </article>
             ))}
           </div>
@@ -776,25 +1025,39 @@ const App = () => {
             </div>
           </div>
 
-          <div className="theme-grid">
-            {themeOrder.map((themeKey) => (
-              <button
-                key={themeKey}
-                className={themeKey === theme ? "theme-tile active" : "theme-tile"}
-                type="button"
-                onClick={() => setTheme(themeKey)}
-              >
-                <strong>{themes[themeKey].name}</strong>
-                <span>{themes[themeKey].description}</span>
-              </button>
-            ))}
+          <div className="theme-stage-layout">
+            <aside className="theme-feature-card">
+              <span className="eyebrow">Current palette</span>
+              <h3>{themes[theme].name}</h3>
+              <p className="theme-feature-description">{themes[theme].description}</p>
+              <div className="theme-feature-meta">
+                <span className="badge">{activeThemeCapability}</span>
+                <span className="eyebrow eyebrow-wrap">{themeModeNote}</span>
+              </div>
+              <p className="theme-mode-copy">{activeThemeSupportCopy}</p>
+            </aside>
+
+            <div className="theme-grid">
+              {themeOrder.map((themeKey) => (
+                <button
+                  key={themeKey}
+                  className={themeKey === theme ? "theme-tile active" : "theme-tile"}
+                  type="button"
+                  onClick={() => setTheme(themeKey)}
+                >
+                  <strong>{themes[themeKey].name}</strong>
+                  <span>{themes[themeKey].description}</span>
+                  <small>{themeKey === "midnight-coder" ? "Built-in dark theme" : "Light and dark modes"}</small>
+                </button>
+              ))}
+            </div>
           </div>
         </motion.section>
       </main>
 
       <footer className="app-footer">
         <p>{footerMessages[Math.floor(Math.random() * footerMessages.length)]}</p>
-        <p style={{ marginTop: '10px' }}>
+        <p className="footer-link-row">
           <a href="https://www.pgofcode.co.za/" target="_blank" rel="noopener noreferrer">୨୧ pg of code ୨୧</a>
         </p>
       </footer>
