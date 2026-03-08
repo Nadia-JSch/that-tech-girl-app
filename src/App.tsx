@@ -72,7 +72,7 @@ const footerMessages = [
   "/* built with sparkle motion and chaos */",
   "/* vibes: immaculate, code: questionable */",
   "/* this app is giving main character */",
-  "/* dont let the console logs bite */",
+  "/* don't let the console logs bite */",
   "/* literally vibrating with potential */",
   "/* bestie energy: ACTIVE */",
   "/* the documentation said no but we did it anyway */"
@@ -178,6 +178,15 @@ const formatDate = (dayKey: string) =>
     month: "long",
     day: "numeric"
   });
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 6) return "Late-night debugging energy.";
+  if (hour < 12) return "Good morning, queen.";
+  if (hour < 17) return "Afternoon focus mode.";
+  if (hour < 21) return "Golden hour coding.";
+  return "Night owl energy activated.";
+};
 
 const renderInlineMarkdown = (text: string) => {
   const segments = text.split(/(\*\*.*?\*\*)/g).filter(Boolean);
@@ -437,20 +446,29 @@ const App = () => {
           
           <h1>That Tech Girl</h1>
           <p className="hero-copy">
-            A pocket ritual for women in tech: one hype-up, one practical move, one reminder
+            {getGreeting()} A pocket ritual for women in tech: one hype-up, one practical move, one reminder
             that your work is real.
           </p>
-          <div className="hero-actions">
+
+          <div className="hero-affirmation" style={{ margin: '24px 0' }}>
+            <span className="badge">{dailyPair.affirmation.topic}</span>
+            <blockquote style={{ fontSize: '1.25rem', fontStyle: 'italic', margin: '12px 0', color: 'var(--text)', lineHeight: '1.4' }}>
+              {displayAffirmation}
+            </blockquote>
+          </div>
+
+          <div className="hero-actions" style={{ marginBottom: '20px' }}>
             <button className={isClaimed ? "primary claimed" : "primary"} type="button" onClick={claimRitual}>
               {isClaimed ? "Claimed for today" : "Start the ritual"}
             </button>
             <button className="secondary" type="button" onClick={shareDailyCard}>
               Share today&apos;s card
             </button>
-            <button className="secondary" type="button" onClick={copyMantra}>
-              {copiedMantra ? "Mantra copied" : "Copy mantra"}
+            <button className="secondary" type="button" onClick={generateWithGemini} disabled={isGenerating}>
+              {isGenerating ? (loadingMessage || "Consulting the cosmos...") : "✦ AI remix"}
             </button>
           </div>
+
           {shareMessage && <span className="eyebrow" style={{ wordBreak: 'break-word', maxWidth: '100%' }}>{shareMessage}</span>}
         </motion.section>
 
@@ -478,15 +496,12 @@ const App = () => {
             src="/incredible-suggestion.jpg"
             alt="A cat surrounded by pointing hands with the text 'incredible suggestion'"
           />
+
+
           
           <div className="mood-stat">
             <strong>{dailyPair.lesson.category} focus</strong>
             <span>{displayLessonTitle}</span>
-          </div>
-          
-          <div className="mood-quote">
-            <strong>Current mantra</strong>
-            <p>"{displayMantra}"</p>
           </div>
 
           <button
@@ -495,7 +510,7 @@ const App = () => {
             onClick={() => {
               setVibeMessage(vibeCheckResponses[Math.floor(Math.random() * vibeCheckResponses.length)]);
             }}
-            style={{ marginTop: '12px', width: '100%' }}
+            style={{ width: '100%' }}
           >
             Check my vibe
           </button>
@@ -513,18 +528,11 @@ const App = () => {
         >
           <div className="section-head">
             <div className="eyebrow-row">
-              <span className="eyebrow">Today&apos;s ritual</span>
+              <span className="eyebrow">Implementation steps</span>
               <span className="eyebrow">{dailyPair.affirmation.topic}</span>
             </div>
-            <h2>{displayAffirmation}</h2>
-            <p className="ritual-caption">Curated, glittery rituals with optional AI help.</p>
-          </div>
-
-          <div className="cta-row">
-            <button className="secondary" type="button" onClick={generateWithGemini} disabled={isGenerating}>
-              {isGenerating ? (loadingMessage || "Consulting the cosmos...") : "✦ AI remix"}
-            </button>
-            {generationError && <span className="eyebrow" style={{ color: 'var(--accent-strong)' }}>{generationError}</span>}
+            <h2>Daily Protocol</h2>
+            <p className="section-copy">Execute these moves to integrate today&apos;s technical energy.</p>
           </div>
 
           <div className="ritual-steps">
