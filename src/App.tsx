@@ -244,15 +244,23 @@ const App = () => {
 
   const copySnippet = async () => {
     if (!displaySnippet) return;
-    await navigator.clipboard.writeText(displaySnippet);
-    setCopiedSnippet(true);
-    window.setTimeout(() => setCopiedSnippet(false), 1600);
+    try {
+      await navigator.clipboard.writeText(displaySnippet);
+      setCopiedSnippet(true);
+      window.setTimeout(() => setCopiedSnippet(false), 1600);
+    } catch {
+      setCopiedSnippet(false);
+    }
   };
 
   const copyMantra = async () => {
-    await navigator.clipboard.writeText(displayMantra);
-    setCopiedMantra(true);
-    window.setTimeout(() => setCopiedMantra(false), 1600);
+    try {
+      await navigator.clipboard.writeText(displayMantra);
+      setCopiedMantra(true);
+      window.setTimeout(() => setCopiedMantra(false), 1600);
+    } catch {
+      setCopiedMantra(false);
+    }
   };
 
   const usePrompt = (prompt: string) => {
