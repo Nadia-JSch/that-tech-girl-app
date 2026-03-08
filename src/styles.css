@@ -73,11 +73,18 @@ body.theme-midnight {
   --bg: #050505;
   --bg-strong: #0f001a;
   --surface: rgba(20, 10, 30, 0.7);
+  --surface-strong: #1a1028;
   --text: #f0f0f0;
   --muted: #a08ba8;
   --accent: #d400ff;
   --accent-strong: #ff00ff;
   --line: rgba(212, 0, 255, 0.3);
+}
+
+body.theme-midnight .secondary {
+  background: rgba(212, 0, 255, 0.15) !important;
+  border-color: rgba(212, 0, 255, 0.4) !important;
+  color: #e0d0ff !important;
 }
 
 /* --- DARK MODE OVERRIDES --- */
@@ -103,14 +110,15 @@ body.dark-mode .card {
 
 /* Fix button contrast specifically for dark mode */
 body.dark-mode .secondary {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
   color: #ffffff !important;
 }
 
 body.dark-mode .secondary:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: var(--accent) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 body.dark-mode .step-card,
@@ -130,8 +138,14 @@ body.dark-mode.theme-midnight {
 }
 
 body.dark-mode.theme-midnight .secondary {
-  background: rgba(0, 255, 204, 0.1) !important;
-  border-color: rgba(0, 255, 204, 0.3) !important;
+  background: rgba(0, 255, 204, 0.15) !important;
+  border-color: rgba(0, 255, 204, 0.4) !important;
+  color: #00ffcc !important;
+}
+
+body.dark-mode.theme-midnight .secondary:hover {
+  background: rgba(0, 255, 204, 0.25) !important;
+  border-color: #00ffcc !important;
   color: #00ffcc !important;
 }
 
@@ -331,6 +345,10 @@ h2 {
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 8px 20px -5px var(--accent);
+}
+
+body.dark-mode .primary {
+  box-shadow: 0 8px 20px -5px rgba(255, 77, 184, 0.4);
 }
 
 .primary:hover {
@@ -640,6 +658,8 @@ pre {
   border: 1.5px solid var(--line);
   border-radius: 16px;
   overflow-x: auto;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 code {
@@ -647,6 +667,8 @@ code {
   font-size: 0.85rem;
   line-height: 1.6;
   color: var(--text);
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 body.dark-mode pre {
@@ -660,6 +682,8 @@ body.dark-mode pre {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
   margin-top: 12px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .archive-card {
@@ -685,13 +709,17 @@ body.dark-mode pre {
   .hero-shell, .main-grid {
     grid-template-columns: 1fr;
   }
-  .app-shell { padding-top: 80px; }
+  .app-shell { padding-top: 80px; padding-left: 16px; padding-right: 16px; }
   html, body {
     overflow-x: hidden;
     max-width: 100vw;
   }
   .hero-card::after {
     display: none;
+  }
+  .hero-card, .card, .mood-panel, .hero-shell, .main-grid {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
