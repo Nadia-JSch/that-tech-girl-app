@@ -207,7 +207,7 @@ const App = () => {
   const claimRitual = () => {
     window.localStorage.setItem(storageKeys.claimed, dailyPair.dayKey);
     setClaimedDay(dailyPair.dayKey);
-    setShareMessage("Ritual claimed. Keep that energy for your next task.");
+    setShareMessage("Keep that energy for your next task.");
   };
 
   const saveJournal = () => {

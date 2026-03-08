@@ -482,6 +482,8 @@ a:focus-visible {
   gap: 24px;
   margin-bottom: 24px;
   align-items: stretch;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .hero-card {
@@ -794,7 +796,21 @@ body.dark-mode pre {
   .primary { width: 100%; text-align: center; min-height: 48px; }
   .prompt-chip { min-height: 44px; padding: 10px 14px; font-size: 11px; }
   .theme-tile { min-height: 80px; padding: 16px; }
-  .marquee-top { display: none; }
-  .app-shell { padding-top: 60px; }
+  .marquee-top { 
+    display: block; 
+    top: 15px;
+  }
+  .marquee span {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+  }
+  .app-shell { padding-top: 40px; }
+  html, body {
+    overflow-x: visible;
+    max-width: 100%;
+  }
+  .app-shell {
+    overflow-x: hidden;
+  }
 }
 
