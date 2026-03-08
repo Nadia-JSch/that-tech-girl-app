@@ -4,7 +4,7 @@ import { join } from "node:path";
 import "dotenv/config";
 
 const port = Number(process.env.API_PORT || 8787);
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = process.env.GROQ_API_KEY;
 const notesDir = process.env.NOTES_DIR || join(import.meta.dirname, "../../blog-app/src/content/coding-notes");
 
 const sendJson = (res, status, body) => {
@@ -15,6 +15,30 @@ const sendJson = (res, status, body) => {
     "Access-Control-Allow-Headers": "Content-Type"
   });
   res.end(JSON.stringify(body));
+};
+
+const groqChat = async (prompt, temperature = 0.9) => {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      temperature,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Groq request failed (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  return JSON.parse(data.choices[0].message.content);
 };
 
 const buildPrompt = ({ theme, topic, experienceLevel }) => `You are writing content for a hyper-feminine but smart women-in-tech PWA.
@@ -94,18 +118,6 @@ Rules:
 - The code example should be short (3 lines max) or null if not applicable
 - Make the tip catchy and sticky`;
 
-const parseJsonResponse = async (response) => {
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
-  const match = text.match(/\{[\s\S]*\}/);
-
-  if (!match) {
-    throw new Error("Gemini did not return parseable JSON.");
-  }
-
-  return JSON.parse(match[0]);
-};
-
 createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     sendJson(res, 204, {});
@@ -114,43 +126,13 @@ createServer(async (req, res) => {
 
   if (req.url === "/api/revision-note" && req.method === "GET") {
     if (!apiKey) {
-      sendJson(res, 500, { error: "Missing GEMINI_API_KEY on the server." });
+      sendJson(res, 500, { error: "Missing GROQ_API_KEY on the server." });
       return;
     }
 
     try {
       const note = await pickRandomNote();
-
-      const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: "user",
-                parts: [{ text: buildRevisionPrompt(note.content, note.filename) }]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              responseMimeType: "application/json"
-            }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        sendJson(res, response.status, { error: "Gemini request failed.", details: errorText });
-        return;
-      }
-
-      const content = await parseJsonResponse(response);
+      const content = await groqChat(buildRevisionPrompt(note.content, note.filename), 0.7);
       sendJson(res, 200, { content, sourceFile: note.filename });
     } catch (error) {
       sendJson(res, 500, {
@@ -167,7 +149,7 @@ createServer(async (req, res) => {
   }
 
   if (!apiKey) {
-    sendJson(res, 500, { error: "Missing GEMINI_API_KEY on the server." });
+    sendJson(res, 500, { error: "Missing GROQ_API_KEY on the server." });
     return;
   }
 
@@ -184,39 +166,7 @@ createServer(async (req, res) => {
       experienceLevel: body.experienceLevel || "early-career"
     };
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: buildPrompt(payload) }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.9,
-            responseMimeType: "application/json"
-          }
-        })
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      sendJson(res, response.status, {
-        error: "Gemini request failed.",
-        details: errorText
-      });
-      return;
-    }
-
-    const content = await parseJsonResponse(response);
+    const content = await groqChat(buildPrompt(payload), 0.9);
     sendJson(res, 200, { content });
   } catch (error) {
     sendJson(res, 500, {
@@ -225,5 +175,5 @@ createServer(async (req, res) => {
     });
   }
 }).listen(port, () => {
-  console.log(`Gemini API server listening on http://127.0.0.1:${port}`);
+  console.log(`Groq API server listening on http://127.0.0.1:${port}`);
 });

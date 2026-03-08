@@ -40,12 +40,6 @@ Rules:
 - snippet: either a short code snippet or a short workplace phrase
 - align the lesson to the same topic as the affirmation`;
 
-const parseJsonResponse = (text: string) => {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("Groq did not return parseable JSON.");
-  return JSON.parse(match[0]);
-};
-
 interface CFContext {
   request: Request;
   env: { GROQ_API_KEY?: string };
@@ -54,13 +48,9 @@ interface CFContext {
 export const onRequestPost = async (context: CFContext) => {
   const { request, env } = context;
 
-  const apiKey = env.GROQ_API_KEY?.trim();
-
+  const apiKey = env.GROQ_API_KEY;
   if (!apiKey) {
-    return jsonResponse({
-      error: "Missing GROQ_API_KEY",
-      message: "Please ensure GROQ_API_KEY is set in Settings > Environment Variables > Production"
-    }, 500);
+    return jsonResponse({ error: "Missing GROQ_API_KEY" }, 500);
   }
 
   const payload = await request.json().catch(() => ({}));
@@ -74,12 +64,13 @@ export const onRequestPost = async (context: CFContext) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      Authorization: `Bearer ${apiKey}`
     },
     body: JSON.stringify({
       model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: buildPrompt(body) }],
       temperature: 0.9,
-      messages: [{ role: "user", content: buildPrompt(body) }]
+      response_format: { type: "json_object" }
     })
   });
 
@@ -90,8 +81,7 @@ export const onRequestPost = async (context: CFContext) => {
 
   try {
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content ?? "";
-    const content = parseJsonResponse(text);
+    const content = JSON.parse(data.choices[0].message.content);
     return jsonResponse({ content });
   } catch (error) {
     return jsonResponse({ error: "Failed to parse Groq response", details: (error as Error).message }, 500);

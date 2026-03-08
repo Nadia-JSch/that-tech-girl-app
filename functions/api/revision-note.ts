@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import notesList from "../../notes/notes.json";
 
 const jsonResponse = (body: unknown, status = 200) =>
@@ -46,12 +40,6 @@ Rules:
 - The code example should be short (3 lines max) or null if not applicable
 - Make the tip catchy and sticky`;
 
-const parseJsonResponse = (text: string) => {
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("Groq did not return parseable JSON.");
-  return JSON.parse(match[0]);
-};
-
 interface CFContext {
   request: Request;
   env: { GROQ_API_KEY?: string };
@@ -60,13 +48,9 @@ interface CFContext {
 export const onRequestGet = async (context: CFContext) => {
   const { env } = context;
 
-  const apiKey = env.GROQ_API_KEY?.trim();
-
+  const apiKey = env.GROQ_API_KEY;
   if (!apiKey) {
-    return jsonResponse({
-      error: "Missing GROQ_API_KEY",
-      message: "Please ensure GROQ_API_KEY is set in Settings > Environment Variables > Production"
-    }, 500);
+    return jsonResponse({ error: "Missing GROQ_API_KEY" }, 500);
   }
 
   const notes = notesList as NoteEntry[];
@@ -80,12 +64,13 @@ export const onRequestGet = async (context: CFContext) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
+      Authorization: `Bearer ${apiKey}`
     },
     body: JSON.stringify({
       model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: buildRevisionPrompt(chosen.content, chosen.filename) }],
       temperature: 0.7,
-      messages: [{ role: "user", content: buildRevisionPrompt(chosen.content, chosen.filename) }]
+      response_format: { type: "json_object" }
     })
   });
 
@@ -96,8 +81,7 @@ export const onRequestGet = async (context: CFContext) => {
 
   try {
     const data = await response.json();
-    const text = data.choices?.[0]?.message?.content ?? "";
-    const content = parseJsonResponse(text);
+    const content = JSON.parse(data.choices[0].message.content);
     return jsonResponse({ content, sourceFile: chosen.filename });
   } catch (error) {
     return jsonResponse({ error: "Failed to parse Groq response", details: (error as Error).message }, 500);
