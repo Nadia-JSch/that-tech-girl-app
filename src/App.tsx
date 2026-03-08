@@ -556,7 +556,7 @@ const App = () => {
             <button className="primary" type="button" onClick={saveJournal}>
               Save technical win
             </button>
-            <span className="eyebrow">Local-first storage active</span>
+            <span className="soft-note">Local-first storage active</span>
           </div>
 
           <div className="mood-quote" style={{ marginTop: '20px' }}>
