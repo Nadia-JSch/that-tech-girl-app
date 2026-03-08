@@ -710,6 +710,22 @@ body.theme-midnight .hero-support-img {
   box-shadow: 0 18px 36px rgba(121, 84, 140, 0.08);
 }
 
+body.dark-mode .theme-feature-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
+    rgba(20, 14, 34, 0.94);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.34);
+}
+
+body.theme-midnight .theme-feature-card {
+  background:
+    linear-gradient(180deg, rgba(212, 0, 255, 0.05), rgba(0, 0, 0, 0)),
+    rgba(17, 8, 28, 0.96);
+  border-color: rgba(212, 0, 255, 0.14);
+  box-shadow: 0 24px 44px rgba(0, 0, 0, 0.42);
+}
+
 .theme-feature-card h3 {
   margin: 0;
   font-family: var(--font-serif);
@@ -1220,6 +1236,30 @@ body.theme-midnight pre {
     linear-gradient(135deg, rgba(255, 246, 228, 0.45), rgba(238, 246, 255, 0.26));
 }
 
+body.dark-mode .chapter-energy {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    linear-gradient(120deg, rgba(255, 77, 184, 0.06), rgba(179, 136, 255, 0.04));
+}
+
+body.dark-mode .chapter-unlocks {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    linear-gradient(135deg, rgba(255, 214, 106, 0.05), rgba(130, 177, 255, 0.035));
+}
+
+body.theme-midnight .chapter-energy {
+  background:
+    linear-gradient(180deg, rgba(212, 0, 255, 0.04), rgba(0, 0, 0, 0)),
+    linear-gradient(120deg, rgba(130, 0, 180, 0.12), rgba(58, 10, 94, 0.28));
+}
+
+body.theme-midnight .chapter-unlocks {
+  background:
+    linear-gradient(180deg, rgba(255, 0, 255, 0.03), rgba(0, 0, 0, 0)),
+    linear-gradient(135deg, rgba(0, 255, 204, 0.05), rgba(35, 18, 62, 0.28));
+}
+
 .archive-energy-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
@@ -1258,6 +1298,22 @@ body.theme-midnight pre {
   box-shadow: 0 14px 30px rgba(136, 110, 72, 0.08);
 }
 
+body.dark-mode .archive-energy-card,
+body.dark-mode .inspiration-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+    rgba(20, 14, 34, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-midnight .archive-energy-card,
+body.theme-midnight .inspiration-card {
+  background:
+    linear-gradient(180deg, rgba(212, 0, 255, 0.035), rgba(0, 0, 0, 0)),
+    rgba(15, 8, 28, 0.78);
+  border-color: rgba(212, 0, 255, 0.12);
+}
+
 .inspiration-card p {
   font-size: 1.12rem;
 }
@@ -1268,6 +1324,11 @@ body.theme-midnight pre {
   white-space: normal;
   color: color-mix(in srgb, var(--text) 76%, var(--muted) 24%);
   opacity: 1;
+}
+
+body.dark-mode .inspiration-copy,
+body.theme-midnight .inspiration-copy {
+  color: color-mix(in srgb, var(--text) 82%, var(--muted) 18%);
 }
 
 .chapter-unlocks .section-copy {
