@@ -355,17 +355,7 @@ const App = () => {
               {copiedMantra ? "Mantra copied" : "Copy mantra"}
             </button>
           </div>
-          <div className="hero-foot">
-            <span className="eyebrow">{shareMessage || ""}</span>
-            <button
-              className="secondary"
-              type="button"
-              onClick={() => setDarkMode((value) => !value)}
-              aria-pressed={darkMode}
-            >
-              {darkMode ? "Glow softly" : "Turn on midnight mode"}
-            </button>
-          </div>
+          {shareMessage && <span className="eyebrow">{shareMessage}</span>}
         </motion.section>
 
         <motion.aside
@@ -374,9 +364,16 @@ const App = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.08, duration: 0.45 }}
         >
-          <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="eyebrow">Daily moodboard</span>
-            <span className="badge" style={{ marginLeft: '10px' }}>Angel mode</span>
+            <button
+              className="secondary tiny"
+              type="button"
+              onClick={() => setDarkMode((value) => !value)}
+              aria-pressed={darkMode}
+            >
+              {darkMode ? "Glow softly" : "Midnight mode"}
+            </button>
           </div>
           
           <img
