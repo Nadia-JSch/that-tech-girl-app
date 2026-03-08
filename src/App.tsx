@@ -354,12 +354,9 @@ const App = () => {
             <button className="secondary" type="button" onClick={copyMantra}>
               {copiedMantra ? "Mantra copied" : "Copy mantra"}
             </button>
-            <button className="secondary" type="button" onClick={generateWithGemini} disabled={isGenerating}>
-              {isGenerating ? "Generating..." : "AI remix"}
-            </button>
           </div>
           <div className="hero-foot">
-            <span className="eyebrow">{generationError || shareMessage || "Curated, glittery rituals with optional AI help."}</span>
+            <span className="eyebrow">{shareMessage || "Curated, glittery rituals with optional AI help."}</span>
             <button
               className="secondary"
               type="button"
@@ -414,6 +411,13 @@ const App = () => {
               <span className="eyebrow">{dailyPair.affirmation.topic}</span>
             </div>
             <h2>{displayAffirmation}</h2>
+          </div>
+
+          <div className="cta-row">
+            <button className="secondary" type="button" onClick={generateWithGemini} disabled={isGenerating}>
+              {isGenerating ? "Generating..." : "✦ AI remix"}
+            </button>
+            {generationError && <span className="eyebrow" style={{ color: 'var(--accent-strong)' }}>{generationError}</span>}
           </div>
 
           <div className="ritual-steps">
@@ -570,6 +574,57 @@ const App = () => {
                 <span className="eyebrow">{entry.createdAt}</span>
                 <p>{entry.text}</p>
               </article>
+            ))}
+          </div>
+        </motion.section>
+        <motion.section
+          className="card archive-stage"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45 }}
+        >
+          <div className="section-head compact">
+            <div>
+              <span className="eyebrow">More energy</span>
+              <h2>Other affirmations in the rotation</h2>
+            </div>
+          </div>
+          <div className="archive-grid">
+            {archiveCards.map((entry) => (
+              <article key={entry.id} className="archive-card">
+                <span className="badge">{entry.topic}</span>
+                <p>{entry.mantra}</p>
+              </article>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section
+          className="card settings-stage"
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.45 }}
+        >
+          <div className="section-head compact">
+            <div>
+              <span className="eyebrow">Personalize it</span>
+              <h2>Choose your palette and app mode</h2>
+            </div>
+          </div>
+
+          <div className="theme-grid">
+            {themeOrder.map((themeKey) => (
+              <button
+                key={themeKey}
+                className={themeKey === theme ? "theme-tile active" : "theme-tile"}
+                type="button"
+                onClick={() => setTheme(themeKey)}
+              >
+                <strong>{themes[themeKey].name}</strong>
+                <span>{themes[themeKey].description}</span>
+              </button>
             ))}
           </div>
         </motion.section>
