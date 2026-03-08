@@ -499,7 +499,11 @@ const App = () => {
 
 
           
-          <div className="mood-stat">
+          <div 
+            className="mood-stat" 
+            style={{ cursor: 'pointer' }}
+            onClick={() => document.getElementById('daily-protocol')?.scrollIntoView({ behavior: 'smooth' })}
+          >
             <strong>{dailyPair.lesson.category} focus</strong>
             <span>{displayLessonTitle}</span>
           </div>
