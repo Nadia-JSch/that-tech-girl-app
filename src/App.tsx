@@ -363,7 +363,7 @@ const App = () => {
               {copiedMantra ? "Mantra copied" : "Copy mantra"}
             </button>
           </div>
-          {shareMessage && <span className="eyebrow">{shareMessage}</span>}
+          {shareMessage && <span className="eyebrow" style={{ wordBreak: 'break-word', maxWidth: '100%' }}>{shareMessage}</span>}
         </motion.section>
 
         <motion.aside
@@ -372,13 +372,14 @@ const App = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.08, duration: 0.45 }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
             <span className="eyebrow">Daily moodboard</span>
             <button
               className="secondary tiny"
               type="button"
               onClick={() => setDarkMode((value) => !value)}
               aria-pressed={darkMode}
+              style={{ flexShrink: 0 }}
             >
               {darkMode ? "Glow softly" : "Midnight mode"}
             </button>

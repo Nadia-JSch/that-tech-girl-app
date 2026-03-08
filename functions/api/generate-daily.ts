@@ -4,12 +4,13 @@ const jsonResponse = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" }
   });
 
-const buildPrompt = ({ theme, topic, experienceLevel }: Record<string, string>) => `You are writing content for a hyper-feminine but smart women-in-tech PWA.
+const buildPrompt = ({ theme, topic, experienceLevel }: Record<string, string>) => `You are writing content for a women-in-tech PWA.
 
 Brand voice:
-- playful, glossy, over-the-top, coquette, a little ironic
-- still technically credible and useful
-- never patronizing, vague, or cringe
+- confident, professional, empowering
+- grounded and authentic, not over-the-top
+- technically credible and useful
+- never generic, patronizing, or try-hard
 - keep output concise
 
 Task:
@@ -32,11 +33,11 @@ Return JSON only with this exact shape:
 }
 
 Rules:
-- affirmation: 1-2 sentences
-- mantra: short and punchy
+- affirmation: 1-2 sentences, genuine and specific
+- mantra: short, memorable, not generic
 - lesson: practical and technically correct
-- bullets: exactly 3
-- ritualSteps: exactly 3
+- bullets: exactly 3, actionable
+- ritualSteps: exactly 3, specific actions
 - snippet: either a short code snippet or a short workplace phrase
 - align the lesson to the same topic as the affirmation`;
 
