@@ -527,7 +527,7 @@ const App = () => {
                   {revision.codeExample && (
                     <pre style={{ marginTop: '15px' }}><code>{revision.codeExample}</code></pre>
                   )}
-                  <div className="badge" style={{ marginTop: '15px' }}>
+                  <div className="badge" style={{ marginTop: '15px', wordBreak: 'break-word', maxWidth: '100%' }}>
                     TIP: {revision.tip}
                   </div>
                 </motion.div>
