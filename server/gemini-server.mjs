@@ -52,6 +52,10 @@ Brand voice:
 Task:
 Generate one daily affirmation ritual and one matching micro-lesson.
 
+The lesson must actually teach something small and concrete.
+Do not write vague encouragement about learning.
+Pick one specific concept, workflow, or communication move and explain it clearly enough that a beginner could use it today.
+
 Inputs:
 - theme: ${theme}
 - topic: ${topic}
@@ -112,12 +116,14 @@ Return JSON only with this exact shape:
 Rules:
 - affirmation: 1-2 sentences
 - mantra: short and punchy
-- lesson: practical and technically correct
-- bullets: exactly 3
+- lesson: practical, technically correct, and educational; it should explain one specific idea, not just say what the user should learn
+- lessonTitle: name the concrete concept or move being taught, not a vague aspiration
+- lessonSummary: 1-2 sentences that explain what the concept is, why it matters, and when to use it
+- bullets: exactly 3; each bullet should teach a real point, step, distinction, or debugging insight
 - ritualSteps: exactly 3
 - archiveAffirmations: exactly 3 distinct extra affirmations that fit the app voice and can draw from any supported topic, including visibility, pacing, imposter syndrome, mistakes, comparison, and communication
 - inspirationIdeas: exactly 4 concrete, inspiring ideas tied to building with CRUD, APIs, async JS, Git, workplace communication, AI workflows, vibe coding, MCPs, or adjacent emergent tooling
-- snippet: either a short code snippet or a short workplace phrase
+- snippet: either a short code snippet or a short workplace phrase that directly matches the lesson and demonstrates the concept
 - align the lesson to the same topic as the affirmation
 - keep the tone warm, a little witty, and emotionally honest; this app is for someone who doubts themselves more than they should, so avoid motivational-poster language`;
 
