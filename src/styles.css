@@ -1108,6 +1108,18 @@ body.theme-midnight .revision-error-chip {
   max-width: 34ch;
 }
 
+.hero-copy a {
+  color: var(--accent-strong);
+  text-decoration-color: color-mix(in srgb, var(--accent-strong) 60%, transparent);
+  text-underline-offset: 0.14em;
+  font-weight: 600;
+}
+
+.hero-copy a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
 .footer-link-row {
   margin-top: 10px;
 }
