@@ -636,7 +636,7 @@ const App = () => {
           <h1>That Tech Girl</h1>
           <p className="hero-copy">
             {getGreeting()} A daily ritual for women in tech that blends affirmations, practical glow-up
-            lessons, and AI-powered revision cards from your own notes.
+            lessons, and AI-powered revision cards from <a href="https://www.pgofcode.co.za/coding-notes/" target="_blank" rel="noopener noreferrer">these coding notes</a>.
           </p>
 
           <div className="hero-affirmation">
