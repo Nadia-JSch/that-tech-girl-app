@@ -656,13 +656,14 @@ body.theme-midnight .hero-support-img {
 .hero-card::after {
   content: "/* binary girl mode: active */";
   position: absolute;
-  bottom: 20px;
-  right: 35px;
+  bottom: 12px;
+  right: 28px;
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--accent);
-  opacity: 0.4;
+  opacity: 0.3;
   z-index: 1;
+  pointer-events: none;
 }
 
 .hero-foot {

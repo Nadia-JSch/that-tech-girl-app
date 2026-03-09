@@ -285,7 +285,7 @@ const formatDate = (dayKey: string) =>
 const getGreeting = () => {
   const hour = new Date().getHours();
   if (hour < 6) return "Late-night debugging energy.";
-  if (hour < 12) return "Good morning, queen.";
+  if (hour < 12) return "Good morning, pixel empress.";
   if (hour < 17) return "Afternoon focus mode.";
   if (hour < 21) return "Golden hour coding.";
   return "Night owl energy activated.";
