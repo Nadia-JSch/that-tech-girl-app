@@ -132,6 +132,7 @@ const vibeCheckResponses = [
   "We're glitching but we're coping.",
   "The universe says: yes, obviously.",
   "Your aura is pixel-perfect.",
+  "Serving server energy.",
   "Serving main character energy.",
   "The algorithm is shook but in a good way.",
   "Vibes: certified baddie.",
@@ -317,7 +318,7 @@ const readJsonStorage = <T,>(key: string) => {
 
 const App = () => {
   const dailyPair = useMemo(() => getDailyPair(), []);
-  const [theme, setTheme] = useState<ThemeKey>("coquette-compiler");
+  const [theme, setTheme] = useState<ThemeKey>("clean-girl-coder");
   const [darkMode, setDarkMode] = useState(false);
   const [journalText, setJournalText] = useState("");
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -635,8 +636,8 @@ const App = () => {
           
           <h1>That Tech Girl</h1>
           <p className="hero-copy">
-            {getGreeting()} A daily ritual for women in tech that blends affirmations, practical glow-up
-            lessons, and AI-powered revision cards from <a href="https://www.pgofcode.co.za/coding-notes/" target="_blank" rel="noopener noreferrer">these coding notes</a>.
+            {getGreeting()} A daily uplift page for chaotic techies trying to make it. Blends mini lessons,
+            bug spray, and AI-powered revision cards from <a href="https://www.pgofcode.co.za/coding-notes/" target="_blank" rel="noopener noreferrer">these coding notes</a>.
           </p>
 
           <div className="hero-affirmation">
@@ -660,12 +661,12 @@ const App = () => {
 
           <div className="hero-foot">
             <div className="hero-status">
-              <span className="eyebrow eyebrow-wrap">{aiStatusLabel}</span>
+              <span className="eyebrow eyebrow-wrap hero-status-chip">{aiStatusLabel}</span>
               <p className="hero-status-note">{aiStatusNote}</p>
             </div>
             <div className="hero-status">
-              <span className="eyebrow eyebrow-wrap">{themeModeNote}</span>
-              {shareMessage && <span className="eyebrow eyebrow-wrap">{shareMessage}</span>}
+              <span className="eyebrow eyebrow-wrap hero-status-chip">{themeModeNote}</span>
+              {shareMessage && <p className="hero-status-note hero-status-feedback">{shareMessage}</p>}
             </div>
           </div>
         </motion.section>
@@ -716,19 +717,23 @@ const App = () => {
           </div>
 
           <button
-            className="secondary full-width mood-vibe-button"
+            className="mood-vibe-card"
             type="button"
             onClick={() => {
               setVibeMessage(vibeCheckResponses[Math.floor(Math.random() * vibeCheckResponses.length)]);
             }}
           >
-            Check my vibe
+            <span className="eyebrow">Vibe check</span>
+            <p className="mood-vibe-prompt">Check my vibe</p>
+            <p className="mood-vibe-result" aria-live="polite">
+              {vibeMessage || "Tap for today's energy read."}
+            </p>
           </button>
           <div className="hero-support-card mood-support-compact">
             <div className="hero-support-copy">
               <span className="eyebrow">Support familiar</span>
               <p className="mood-support-message">
-                {vibeMessage || "Your soft little reminder that you can absolutely do this."}
+                Your soft little reminder that you can absolutely do this.
               </p>
             </div>
             <img

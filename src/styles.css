@@ -451,9 +451,12 @@ a:focus-visible {
   flex-direction: column;
   gap: 12px;
   padding: 20px;
-  background: var(--bg-strong);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.18)),
+    color-mix(in srgb, var(--bg-strong) 90%, white 10%);
   border-radius: var(--radius-inner);
   border: 1.5px solid var(--line);
+  box-shadow: 0 10px 24px rgba(255, 77, 184, 0.05);
 }
 
 .mood-stat strong {
@@ -475,6 +478,105 @@ a:focus-visible {
   font-size: 1.1rem;
   font-style: italic;
   color: var(--muted);
+}
+
+.mood-vibe-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 18px 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.22)),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 72%, white 28%), var(--bg-strong));
+  border: 1.5px solid color-mix(in srgb, var(--accent) 36%, var(--line) 64%);
+  border-radius: var(--radius-inner);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition);
+  box-shadow: 0 12px 26px rgba(255, 77, 184, 0.1);
+}
+
+.mood-vibe-card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 48%, var(--line) 52%);
+  box-shadow: 0 14px 28px rgba(255, 77, 184, 0.14);
+}
+
+.mood-vibe-card .eyebrow {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.mood-vibe-prompt {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.mood-vibe-result {
+  margin: 0;
+  min-height: 2.8em;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--text) 78%, var(--muted) 22%);
+}
+
+body.dark-mode .mood-stat,
+body.dark-mode .mood-quote,
+body.dark-mode .mood-vibe-card,
+body.dark-mode .mood-support-compact {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    rgba(24, 16, 39, 0.82);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.28);
+}
+
+body.dark-mode .mood-vibe-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+    linear-gradient(135deg, rgba(255, 77, 184, 0.09), rgba(48, 24, 80, 0.88));
+  border-color: rgba(255, 77, 184, 0.22);
+  box-shadow: 0 20px 36px rgba(0, 0, 0, 0.34);
+}
+
+body.dark-mode .mood-vibe-card:hover {
+  border-color: rgba(255, 77, 184, 0.34);
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.38);
+}
+
+body.dark-mode .mood-vibe-card .eyebrow {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+body.theme-midnight .mood-stat,
+body.theme-midnight .mood-quote,
+body.theme-midnight .mood-support-compact {
+  background:
+    linear-gradient(180deg, rgba(212, 0, 255, 0.03), rgba(0, 0, 0, 0)),
+    rgba(17, 8, 29, 0.84);
+  border-color: rgba(212, 0, 255, 0.14);
+}
+
+body.theme-midnight .mood-vibe-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
+    linear-gradient(135deg, rgba(0, 255, 204, 0.08), rgba(36, 14, 66, 0.92));
+  border-color: rgba(0, 255, 204, 0.22);
+  box-shadow: 0 22px 40px rgba(0, 0, 0, 0.4);
+}
+
+body.theme-midnight .mood-vibe-card .eyebrow {
+  background: rgba(0, 255, 204, 0.08);
+}
+
+body.theme-midnight .mood-vibe-result {
+  color: color-mix(in srgb, var(--text) 80%, var(--accent) 20%);
 }
 
 /* --- LAYOUT FIXES --- */
@@ -962,17 +1064,24 @@ body.theme-midnight .theme-feature-card {
 
 .hero-status-note {
   margin: 0;
+  width: 100%;
+  padding-left: 2px;
   font-family: var(--font-mono);
   font-size: 10px;
   line-height: 1.6;
   color: var(--muted);
-  max-width: 36ch;
+  max-width: 100%;
 }
 
 .hero-status .eyebrow {
   width: 100%;
   min-height: 46px;
   align-items: center;
+}
+
+.hero-status-feedback {
+  max-width: 100%;
+  color: color-mix(in srgb, var(--text) 76%, var(--muted) 24%);
 }
 
 .eyebrow-wrap {
@@ -1041,17 +1150,6 @@ body.theme-midnight .theme-feature-card {
 
 .full-width {
   width: 100%;
-}
-
-.mood-vibe-button {
-  justify-content: center;
-  padding-block: 10px;
-}
-
-.eyebrow-centered {
-  margin-top: 8px;
-  text-align: center;
-  justify-content: center;
 }
 
 .snippet-action {

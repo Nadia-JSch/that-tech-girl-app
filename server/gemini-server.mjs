@@ -211,7 +211,7 @@ createServer(async (req, res) => {
 
     const body = JSON.parse(Buffer.concat(chunks).toString() || "{}");
     const payload = {
-      theme: body.theme || "coquette-compiler",
+      theme: body.theme || "clean-girl-coder",
       topic: body.topic || "confidence",
       experienceLevel: body.experienceLevel || "early-career"
     };

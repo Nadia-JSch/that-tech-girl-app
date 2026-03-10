@@ -106,7 +106,7 @@ export const onRequestPost = async (context: CFContext) => {
 
   const payload = await request.json().catch(() => ({}));
   const body = {
-    theme: typeof payload.theme === "string" ? payload.theme : "coquette-compiler",
+    theme: typeof payload.theme === "string" ? payload.theme : "clean-girl-coder",
     topic: typeof payload.topic === "string" ? payload.topic : "confidence",
     experienceLevel: typeof payload.experienceLevel === "string" ? payload.experienceLevel : "early-career"
   };
