@@ -87,7 +87,7 @@ Rules:
 - ritualSteps: exactly 3, specific actions
 - archiveAffirmations: exactly 3 distinct extra affirmations that fit the same app voice and can draw from any supported topic, including visibility, pacing, imposter syndrome, mistakes, comparison, and communication
 - inspirationIdeas: exactly 4 concrete, inspiring ideas tied to building with CRUD, APIs, async JS, Git, workplace communication, AI workflows, vibe coding, MCPs, or adjacent emergent tooling
-- snippet: either a short code snippet or a short workplace phrase that directly matches the lesson and demonstrates the concept
+- snippet: either a short code snippet or a short workplace phrase that directly matches the lesson and demonstrates the concept. If it's code, format it with newlines (\\n) so it reads like a real code sample — put opening braces on the same line, each statement on its own line, and use 2-space indentation
 - align the lesson to the same topic as the affirmation
 - keep the tone warm, a little witty, and emotionally honest; this app is for someone who doubts themselves more than they should, so avoid motivational-poster language`;
 

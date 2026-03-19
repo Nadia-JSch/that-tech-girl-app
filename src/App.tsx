@@ -1,10 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { affirmations, themes, type ThemeKey } from "./data/content";
+import {
+  affirmations,
+  lessonResources,
+  themes,
+  type ThemeKey,
+} from "./data/content";
 import { getDailyPair } from "./lib/daily";
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import bash from "highlight.js/lib/languages/bash";
+import markdown from "highlight.js/lib/languages/markdown";
+
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("bash", bash);
+hljs.registerLanguage("markdown", markdown);
 
 type JournalEntry = {
   text: string;
+  tag?: string;
+  emoji?: string;
   createdAt: string;
 };
 
@@ -36,12 +51,12 @@ type RevisionNote = {
 };
 
 type CachedDailyContent = {
-  dayKey: string;
+  cacheKey: string;
   content: GeneratedContent;
 };
 
 type CachedRevisionCard = {
-  dayKey: string;
+  cacheKey: string;
   content: RevisionNote;
   sourceFile: string;
 };
@@ -53,18 +68,38 @@ const storageKeys = {
   claimed: "that-tech-girl.claimed-day",
   dark: "that-tech-girl.dark-mode",
   dailyAi: "that-tech-girl.daily-ai",
-  dailyRevision: "that-tech-girl.daily-revision"
+  dailyRevision: "that-tech-girl.daily-revision",
+  preferredTopic: "that-tech-girl.preferred-topic"
 };
 
+const navItems = [
+  { id: "ritual", label: "Ritual" },
+  { id: "protocol", label: "Protocol" },
+  { id: "lesson", label: "Lesson" },
+  { id: "revision", label: "Revision" },
+  { id: "win-log", label: "Win log" },
+  { id: "bug-spray", label: "Bug spray" },
+  { id: "palette", label: "Palette" }
+];
+
 const miniAffirmationTemplates = [
-  "You showed range today. Shipping counts, even when it felt messy.",
-  "That win was not luck. It was skill, judgment, and follow-through.",
-  "Your consistency is building technical confidence in real time.",
-  "You made progress today, and progress is what compounds.",
-  "You handled that technical ambiguity with serious poise.",
-  "Your perspective added value to the discussion today.",
-  "You are navigating your career with intention and style.",
-  "Small technical wins are the bricks that build great careers."
+  "That's not luck. That's skill with a receipt.",
+  "Imposter syndrome has no evidence. You do.",
+  "Another data point that you belong here.",
+  "The record shows: competence.",
+  "You did that. On purpose. With your brain.",
+  "Future you will read this and feel so seen.",
+  "Filed under: things a fake person couldn't do.",
+  "Your evidence file is getting thick.",
+  "Proof of brilliance, softly logged.",
+  "You are not winging it. You are adapting in real time.",
+  "Every tiny win still counts as a win.",
+  "Competence can be quiet and still be undeniable.",
+  "This is your reminder that you know what you're doing.",
+  "The receipts are glowing today.",
+  "A very elegant display of technical range.",
+  "Not accidental. Not random. Entirely you.",
+  "This belongs in the archive of iconic things you've done."
 ];
 
 const loadingMessages = [
@@ -74,7 +109,14 @@ const loadingMessages = [
   "The universe is listening...",
   "Manifesting your success...",
   "The compile gods are pondering...",
-  "Aligning your vibes..."
+  "Aligning your vibes...",
+  "Pulling a prettier timeline...",
+  "Reading the code tea leaves...",
+  "Syncing with your soft-launch destiny...",
+  "Decorating the stack with good omens...",
+  "Fetching a fresh little prophecy...",
+  "Tuning the frequency of your next win...",
+  "Recalculating your main character arc..."
 ];
 
 const journalCompliments = [
@@ -86,7 +128,15 @@ const journalCompliments = [
   "The PR gods have accepted this offering.",
   "Your branch was merged successfully.",
   "This win has been committed to memory.",
-  "The algorithm is shook."
+  "The algorithm is shook.",
+  "Your future self is obsessed with this entry.",
+  "This is what a person who belongs here sounds like.",
+  "The evidence board just got hotter.",
+  "Your technical aura has been updated.",
+  "A deeply chic display of competence.",
+  "The system recognizes this as a real win.",
+  "This entry has strong promotion-review energy.",
+  "Your progress log is getting impossible to argue with."
 ];
 
 const footerMessages = [
@@ -97,7 +147,14 @@ const footerMessages = [
   "/* don't let the console logs bite */",
   "/* literally vibrating with potential */",
   "/* bestie energy: ACTIVE */",
-  "/* the documentation said no but we did it anyway */"
+  "/* the documentation said no but we did it anyway */",
+  "/* polished enough to deploy, chaotic enough to be fun */",
+  "/* soft life, hard skills */",
+  "/* pretty interface, serious problem-solving */",
+  "/* emotionally supported by syntax highlighting */",
+  "/* currently romanticizing the backlog */",
+  "/* all sparkle, no imposter */",
+  "/* beauty, brains, and browser storage */"
 ];
 
 const buildIdeas = [
@@ -124,6 +181,48 @@ const buildIdeas = [
     title: "Turn communication into technical force multiplication",
     description:
       "The same skills you're practicing here can become demos, internal tools, onboarding helpers, PR bots, research assistants, or product prototypes that make teams move faster."
+  },
+  {
+    label: "Portfolio move",
+    title: "Make a tiny dashboard for your strongest habits",
+    description:
+      "Track sleep, study streaks, applications, workouts, or mood with a small polished UI and thoughtful CRUD flows that actually show product taste."
+  },
+  {
+    label: "Frontend flex",
+    title: "Build a ritual-based UI with state that feels magical",
+    description:
+      "Use transitions, local storage, and friendly copy to make a daily experience feel personal without overcomplicating the code."
+  },
+  {
+    label: "Automation",
+    title: "Create a soft little workflow bot for repetitive tasks",
+    description:
+      "Turn recurring chores into scripts or mini tools: file cleanup, note formatting, issue triage, changelog drafting, or meeting-summary generation."
+  },
+  {
+    label: "Learning system",
+    title: "Turn revision into a spaced-repetition studio",
+    description:
+      "Combine flashcards, snippets, confidence ratings, and tiny prompts into a study tool that feels more like a lifestyle app than homework."
+  },
+  {
+    label: "Team tool",
+    title: "Design a handoff helper that reduces unclear updates",
+    description:
+      "Build a form or assistant that helps teammates write better status notes, bug reports, or PR summaries with consistent structure."
+  },
+  {
+    label: "Creative tech",
+    title: "Make a mood-based recommendation engine",
+    description:
+      "Blend tagged content, playful prompts, and lightweight logic to recommend music, tasks, tutorials, or affirmations based on energy level."
+  },
+  {
+    label: "Career visibility",
+    title: "Build your brag doc as an actual product",
+    description:
+      "Turn your wins, feedback, metrics, and screenshots into a searchable personal archive so advocating for yourself gets easier over time."
   }
 ];
 
@@ -136,42 +235,88 @@ const vibeCheckResponses = [
   "Serving main character energy.",
   "The algorithm is shook but in a good way.",
   "Vibes: certified baddie.",
-  "Cosmic approval: granted."
+  "Cosmic approval: granted.",
+  "The signal is clear: you're still that girl.",
+  "Your aura is compiling beautifully.",
+  "Energy report: soft, sharp, and dangerous.",
+  "Romanticizing the backlog is working.",
+  "The readout says: chic and capable.",
+  "Your frequency is set to quietly iconic.",
+  "The system detects elegant resilience.",
+  "Current mood: glitter with boundaries.",
+  "You are serving calm technical authority.",
+  "The stars say push the branch.",
+  "Your energy is half velvet, half debugger.",
+  "A gentle reminder that your brain is elite.",
+  "The dashboard says you ate, actually.",
+  "Signal strength: main-character with receipts.",
+  "Today's read: polished, powerful, and unbothered."
 ];
 
 const bugSprayResponses: Record<string, string> = {
-  "meeting": "MEETING ELIMINATED. The docs said no but we did it anyway.",
-  "meetings": "MEETINGS: GONE. Your calendar is now pristine. You're welcome.",
-  "slack": "SLACK NOTIFICATIONS: OBLITERATED. Peace has been restored to your mental state.",
+  meeting: "MEETING ELIMINATED. The docs said no but we did it anyway.",
+  meetings: "MEETINGS: GONE. Your calendar is now pristine. You're welcome.",
+  slack: "SLACK NOTIFICATIONS: OBLITERATED. Peace has been restored to your mental state.",
   "slack notifications": "NOTIFICATIONS: VAPORIZED. Your phone can sleep now.",
   "tech debt": "TECH DEBT: SPRAYED INTO OBLIVION. The code gods are shook.",
-  "bugs": "BUGS: EXTERMINATED. Another one bites the dust.",
-  "bug": "BUG: TERMINATED. Your code is now 100% less buggy.",
+  bugs: "BUGS: EXTERMINATED. Another one bites the dust.",
+  bug: "BUG: TERMINATED. Your code is now 100% less buggy.",
   "imposter syndrome": "IMPOSTER SYNDROME: INVALIDATED. You belong here. That's final.",
-  "procrastination": "PROCRASTINATION: GONE. Your productivity just leveled up.",
-  "burnout": "BURNOUT: SPRAYED AWAY. Self-care has entered the chat.",
-  "friday": "FRIDAY FEELINGS: ACTIVATED. The weekend is near.",
-  "monday": "MONDAY MOODS: ELIMINATED. You're built for this.",
+  procrastination: "PROCRASTINATION: GONE. Your productivity just leveled up.",
+  burnout: "BURNOUT: SPRAYED AWAY. Self-care has entered the chat.",
+  friday: "FRIDAY FEELINGS: ACTIVATED. The weekend is near.",
+  monday: "MONDAY MOODS: ELIMINATED. You're built for this.",
   "pull request": "PR REVIEW: COMPLETED. The merge is imminent.",
   "merge conflict": "MERGE CONFLICT: DISSOLVED. Git is now your servant.",
-  "deployment": "DEPLOYMENT: SUCCESS. Ship it and dip.",
-  "debugging": "DEBUGGING: DONE. The bug never stood a chance.",
-  "deadline": "DEADLINE: EXTENDED (mentally). You've got this.",
+  deployment: "DEPLOYMENT: SUCCESS. Ship it and dip.",
+  debugging: "DEBUGGING: DONE. The bug never stood a chance.",
+  deadline: "DEADLINE: EXTENDED (mentally). You've got this.",
   "performance issue": "PERFORMANCE: OPTIMIZED. It goes brrrrr now.",
   "memory leak": "MEMORY LEAK: PATCHED. Your RAM can finally rest.",
   "null pointer": "NULL POINTER: HANDLED. The undefined is now defined.",
-  "default": "SPRAYED AND DISMISSED. That thing doesn't stand a chance."
+  default: "SPRAYED AND DISMISSED. That thing doesn't stand a chance."
 };
 
-const journalPrompts = [
-  "I explained my thinking clearly when...",
-  "I stayed calm and debugged...",
-  "Something I learned faster today was...",
-  "A moment I should give myself credit for is...",
-  "I advocated for my technical approach by...",
-  "I helped a teammate unblock themselves when...",
-  "A complex concept that finally clicked today was...",
-  "I prioritized my deep work today by..."
+const evidenceTags = [
+  { emoji: "🐛", label: "Fixed a bug" },
+  { emoji: "🚀", label: "Shipped something" },
+  { emoji: "💡", label: "Figured it out" },
+  { emoji: "🗣️", label: "Spoke up" },
+  { emoji: "🤝", label: "Helped someone" },
+  { emoji: "📚", label: "Learned something new" },
+  { emoji: "🔥", label: "Survived a hard day" },
+  { emoji: "✍️", label: "Wrote good code" },
+  { emoji: "🧠", label: "Solved something tricky" },
+  { emoji: "🪄", label: "Made it smoother" },
+  { emoji: "🎯", label: "Got unstuck" },
+  { emoji: "📣", label: "Shared progress" },
+  { emoji: "🧩", label: "Connected the dots" },
+  { emoji: "💻", label: "Finished a feature" },
+  { emoji: "🌱", label: "Stayed consistent" },
+  { emoji: "✨", label: "Had a breakthrough" },
+];
+
+const evidenceReframes = [
+  "That's not luck. That's skill with a receipt.",
+  "Imposter syndrome has no evidence. You do.",
+  "Filed under: things a fake person couldn't do.",
+  "Your brain lied. Your git log didn't.",
+  "Evidence collected. Case closed.",
+  "Another data point that you belong here.",
+  "The record shows: competence.",
+  "Noted, logged, and undeniable.",
+  "You did that. On purpose. With your brain.",
+  "Future you will read this and feel so seen.",
+  "This is what progress looks like in real life, not in a highlight reel.",
+  "You are building proof faster than doubt can keep up.",
+  "Tiny wins still count as evidence when they are real.",
+  "Your growth is documented now, which is inconvenient for your inner hater.",
+  "There is nothing accidental about repeated competence.",
+  "This goes in the folder marked: absolutely capable.",
+  "You keep doing hard things and then pretending it was normal.",
+  "The facts remain glamorous and in your favor.",
+  "Real skill often looks quieter than panic expects.",
+  "Even on a weird day, the evidence is still evidence.",
 ];
 
 const ritualByTopic = {
@@ -182,7 +327,11 @@ const ritualByTopic = {
     "Write down one technical thing you explained well today.",
     "Strike a power pose before your next high-stakes call.",
     "Recall a time you fixed a 'unfixable' bug.",
-    "Compliment a teammate on their technical logic today."
+    "Compliment a teammate on their technical logic today.",
+    "Say one idea before you over-edit it in your head.",
+    "Write your next question down exactly as it is and ask it anyway.",
+    "List three things you know now that you did not know six months ago.",
+    "Notice one place where your instinct was correct before the proof arrived."
   ],
   learning: [
     "Read the affirmation and underline the skill word that fits today.",
@@ -191,7 +340,11 @@ const ritualByTopic = {
     "Explain a new concept to a 'rubber duck' or a non-tech friend.",
     "Read one page of documentation for a tool you use every day.",
     "Identify one 'magic' part of your stack and look under the hood.",
-    "Write a 3-sentence summary of one thing you learned today."
+    "Write a 3-sentence summary of one thing you learned today.",
+    "Turn one confusing term into a flashcard or note.",
+    "Practice one tiny example instead of consuming more content.",
+    "Highlight the exact sentence in the docs that unlocked the concept.",
+    "Revisit one thing you learned last week so it sticks."
   ],
   feedback: [
     "Take a breath before attaching meaning to critique.",
@@ -200,7 +353,11 @@ const ritualByTopic = {
     "Celebrate the fact that someone cared enough to review your work.",
     "Find one positive piece of feedback and save it in your brag doc.",
     "Ask for feedback on a specific part of your code you're unsure about.",
-    "Give someone else high-quality, supportive feedback today."
+    "Give someone else high-quality, supportive feedback today.",
+    "Translate one comment into a concrete code change before spiraling.",
+    "Separate tone from substance and respond to the useful part first.",
+    "Write down what you agree with before deciding what to question.",
+    "Thank someone for precision, not just for approval."
   ],
   debugging: [
     "Read the affirmation slowly and commit to staying methodical.",
@@ -209,7 +366,11 @@ const ritualByTopic = {
     "Take a 5-minute screen break if the logic isn't flowing.",
     "Explain the bug out loud to see if the gap becomes obvious.",
     "Check your assumptions—is the server actually running?",
-    "Check the logs for one specific keyword you usually ignore."
+    "Check the logs for one specific keyword you usually ignore.",
+    "Write the expected behavior in one sentence before testing again.",
+    "Remove one moving part so the bug has fewer places to hide.",
+    "Confirm the data shape instead of trusting the interface in your head.",
+    "Leave yourself one note about the fix so future you feels protected."
   ],
   career: [
     "Read the affirmation and picture one room you belong in.",
@@ -218,7 +379,11 @@ const ritualByTopic = {
     "Reach out to one person whose work you admire for a 15-min chat.",
     "Update your LinkedIn or portfolio with one recent win.",
     "Block out 'focus time' on your calendar for deep technical work.",
-    "Read back through your brag document to remind yourself of your range."
+    "Read back through your brag document to remind yourself of your range.",
+    "Write one sentence about your current role that sounds like leadership.",
+    "Note one business outcome your work improved, even indirectly.",
+    "Document one process you understand well enough to teach someone else.",
+    "Pick one small move that future-you would call strategic."
   ],
   visibility: [
     "Write down one task you completed this week that required real skill.",
@@ -227,7 +392,11 @@ const ritualByTopic = {
     "Name one quiet contribution you made that kept work moving.",
     "Finish one task in a way that leaves a clearer trail for the next person.",
     "Notice where your work is already visible without forcing a performance.",
-    "Pick one low-pressure way to let your work be seen today."
+    "Pick one low-pressure way to let your work be seen today.",
+    "Share a before-and-after when you fix something messy.",
+    "Post one concise update that names progress, not just effort.",
+    "Mention one decision you made and why it mattered.",
+    "Leave one thoughtful note that makes your judgment visible."
   ],
   pacing: [
     "Name one thing you're understanding more deeply because you did not rush it.",
@@ -236,7 +405,11 @@ const ritualByTopic = {
     "Give yourself twenty focused minutes without checking how other people are moving.",
     "Write down one place where slowing down prevented a bigger mess.",
     "Choose depth over speed for one part of today's work on purpose.",
-    "End the day by noting what became clearer because you stayed with it."
+    "End the day by noting what became clearer because you stayed with it.",
+    "Close one tab that is making you feel rushed instead of focused.",
+    "Choose a finish line for this session that is honest, not aspirational.",
+    "Protect one block of uninterrupted time like it matters, because it does.",
+    "Notice how much better your thinking gets when you stop narrating your pace."
   ],
   "imposter syndrome": [
     "Open your brag doc, commits, or shipped work and read three pieces of evidence out loud.",
@@ -245,7 +418,11 @@ const ritualByTopic = {
     "Notice where your brain is making feelings sound like facts and separate the two.",
     "Ask yourself what proof you would accept from a friend in your exact position.",
     "List one thing you learned this month that proves you are still growing, not faking it.",
-    "Keep one visible reminder of your own evidence nearby for the rest of the day."
+    "Keep one visible reminder of your own evidence nearby for the rest of the day.",
+    "Read one old message that proves someone trusted your judgment.",
+    "Write down what is actually expected of you today, not what fear invented.",
+    "Let being in progress count as being real.",
+    "Name one area where your standards are higher than your actual performance requirement."
   ],
   mistakes: [
     "Name one mistake from this week in neutral language, without turning it into a personality trait.",
@@ -254,7 +431,11 @@ const ritualByTopic = {
     "Notice how much energy goes into shame, then redirect some of it into repair.",
     "Treat one misstep like debugging data: what happened, why, and what changes next time?",
     "Remember one time you recovered well after getting something wrong.",
-    "Say the sentence 'I made a mistake, and I am still a competent person' once without arguing with it."
+    "Say the sentence 'I made a mistake, and I am still a competent person' once without arguing with it.",
+    "Write the fix before you write the self-criticism.",
+    "Separate impact from identity in one sentence.",
+    "Apologize clearly if needed, then stop performing punishment.",
+    "Notice how repair is usually more useful than rumination."
   ],
   comparison: [
     "Catch one comparison thought and rewrite it as information, not a verdict.",
@@ -263,7 +444,11 @@ const ritualByTopic = {
     "Unfollow, mute, or step away from one input that reliably makes you feel behind.",
     "List two ways your path already fits your real circumstances better than a copied timeline would.",
     "Pick one personal measure of progress for today and ignore the rest.",
-    "Read back your last three journal entries as if a friend wrote them."
+    "Read back your last three journal entries as if a friend wrote them.",
+    "Name one invisible strength in your process that public timelines never show.",
+    "Replace one envy spiral with one action that belongs to your own path.",
+    "Remember that speed, visibility, and depth are not the same metric.",
+    "Choose admiration without turning it into self-erasure."
   ],
   communication: [
     "Ask one clarifying question earlier than you usually would.",
@@ -272,7 +457,11 @@ const ritualByTopic = {
     "Notice one moment today where clarity saved time or confusion.",
     "Write down one question you are avoiding and ask it in the lowest-stakes channel available.",
     "Name one communication habit that makes your work easier for other people to follow.",
-    "End one update with a direct next step instead of leaving it open-ended."
+    "End one update with a direct next step instead of leaving it open-ended.",
+    "Swap one soft vague phrase for a precise sentence.",
+    "State one assumption out loud before it quietly becomes a bug.",
+    "Use a short bullet list when the message has more than one moving part.",
+    "Ask yourself whether your update answers: what changed, what matters, what next."
   ]
 } as const;
 
@@ -317,7 +506,8 @@ const readJsonStorage = <T,>(key: string) => {
 };
 
 const App = () => {
-  const dailyPair = useMemo(() => getDailyPair(), []);
+  // Topic is determined by the daily rotation, not user selection
+  const dailyPair = useMemo(() => getDailyPair(new Date()), []);
   const [theme, setTheme] = useState<ThemeKey>("clean-girl-coder");
   const [darkMode, setDarkMode] = useState(false);
   const [journalText, setJournalText] = useState("");
@@ -326,9 +516,11 @@ const App = () => {
   const [shareMessage, setShareMessage] = useState("");
   const [copiedSnippet, setCopiedSnippet] = useState(false);
   const [generated, setGenerated] = useState<GeneratedContent | null>(null);
+  const [generatedCacheKey, setGeneratedCacheKey] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [revision, setRevision] = useState<RevisionNote | null>(null);
   const [revisionSource, setRevisionSource] = useState("");
+  const [revisionCacheKey, setRevisionCacheKey] = useState("");
   const [isLoadingRevision, setIsLoadingRevision] = useState(false);
   const [revisionError, setRevisionError] = useState("");
   const [showAnswer, setShowAnswer] = useState(false);
@@ -336,16 +528,22 @@ const App = () => {
   const [loadingMessage, setLoadingMessage] = useState("");
   const [sprayInput, setSprayInput] = useState("");
   const [sprayResult, setSprayResult] = useState("");
+  const [selectedTag, setSelectedTag] = useState<{ emoji: string; label: string } | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [activeSection, setActiveSection] = useState("ritual");
+  const initialCacheKeyRef = useRef<string | null>(null);
+
+  const cacheKey = dailyPair.dayKey;
+
+  const [footerMessage] = useState(
+    () => footerMessages[Math.floor(Math.random() * footerMessages.length)]
+  );
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(storageKeys.theme) as ThemeKey | null;
     const savedJournal = readJsonStorage<JournalEntry[]>(storageKeys.journal);
     const savedClaimed = window.localStorage.getItem(storageKeys.claimed);
     const savedDark = window.localStorage.getItem(storageKeys.dark);
-    const savedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
-    const savedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
-
     if (savedTheme && themeOrder.includes(savedTheme)) {
       setTheme(savedTheme);
     }
@@ -358,15 +556,33 @@ const App = () => {
     if (savedDark) {
       setDarkMode(savedDark === "true");
     }
-    if (savedDailyAi?.dayKey === dailyPair.dayKey) {
-      setGenerated(savedDailyAi.content);
-    }
-    if (savedRevision?.dayKey === dailyPair.dayKey) {
-      setRevision(savedRevision.content);
-      setRevisionSource(savedRevision.sourceFile);
-    }
     setIsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const savedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
+    const savedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
+
+    if (savedDailyAi?.cacheKey === cacheKey) {
+      setGenerated(savedDailyAi.content);
+      setGeneratedCacheKey(cacheKey);
+    } else {
+      setGenerated(null);
+      setGeneratedCacheKey("");
+    }
+
+    if (savedRevision?.cacheKey === cacheKey) {
+      setRevision(savedRevision.content);
+      setRevisionSource(savedRevision.sourceFile);
+      setRevisionCacheKey(cacheKey);
+    } else {
+      setRevision(null);
+      setRevisionSource("");
+      setRevisionCacheKey("");
+    }
+  }, [cacheKey, isHydrated]);
 
   const isMidnightTheme = theme === "midnight-coder";
   const effectiveDarkMode = darkMode && !isMidnightTheme;
@@ -382,36 +598,64 @@ const App = () => {
     window.localStorage.setItem(storageKeys.journal, JSON.stringify(entries));
   }, [entries]);
 
+  const preferredTopicForApi = dailyPair.affirmation.topic;
+
   useEffect(() => {
-    if (generated) {
+    if (generated && generatedCacheKey === cacheKey) {
       const payload: CachedDailyContent = {
-        dayKey: dailyPair.dayKey,
+        cacheKey,
         content: generated
       };
       window.localStorage.setItem(storageKeys.dailyAi, JSON.stringify(payload));
     }
-  }, [dailyPair.dayKey, generated]);
+  }, [cacheKey, generated, generatedCacheKey]);
 
   useEffect(() => {
-    if (revision && revisionSource) {
+    if (revision && revisionSource && revisionCacheKey === cacheKey) {
       const payload: CachedRevisionCard = {
-        dayKey: dailyPair.dayKey,
+        cacheKey,
         content: revision,
         sourceFile: revisionSource
       };
       window.localStorage.setItem(storageKeys.dailyRevision, JSON.stringify(payload));
     }
-  }, [dailyPair.dayKey, revision, revisionSource]);
+  }, [cacheKey, revision, revisionCacheKey, revisionSource]);
+
+  useEffect(() => {
+    const sections = navItems
+      .map((item) => document.getElementById(item.id))
+      .filter((section): section is HTMLElement => Boolean(section));
+
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entriesList) => {
+        const visible = entriesList
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (visible?.target.id) {
+          setActiveSection(visible.target.id);
+        }
+      },
+      {
+        rootMargin: "-35% 0px -45% 0px",
+        threshold: [0.2, 0.4, 0.6]
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+    return () => observer.disconnect();
+  }, []);
 
   const isClaimed = claimedDay === dailyPair.dayKey;
   const journalAffirmation =
     miniAffirmationTemplates[entries.length % miniAffirmationTemplates.length];
-  
+
   const ritualSteps = useMemo(() => {
     const allSteps = ritualByTopic[dailyPair.affirmation.topic];
     const dayHash = dailyPair.dayKey.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    
-    // Pick 3 steps deterministically based on the date
+
     return [
       allSteps[dayHash % allSteps.length],
       allSteps[(dayHash + 1) % allSteps.length],
@@ -419,26 +663,39 @@ const App = () => {
     ];
   }, [dailyPair.affirmation.topic, dailyPair.dayKey]);
 
-  const archiveCards = generated?.archiveAffirmations ?? affirmations
-    .filter((entry) => entry.id !== dailyPair.affirmation.id)
-    .slice(0, 3)
-    .map((entry) => ({ topic: entry.topic, mantra: entry.mantra }));
+  const archiveCards =
+    generated?.archiveAffirmations ??
+    affirmations
+      .filter((entry) => entry.id !== dailyPair.affirmation.id)
+      .slice(0, 3)
+      .map((entry) => ({ topic: entry.topic, mantra: entry.mantra }));
   const displayAffirmation = generated?.affirmation ?? dailyPair.affirmation.text;
   const displayMantra = generated?.mantra ?? dailyPair.affirmation.mantra;
   const displayLessonTitle = generated?.lessonTitle ?? dailyPair.lesson.title;
   const displayLessonSummary = generated?.lessonSummary ?? dailyPair.lesson.summary;
   const displayLessonBullets = generated?.bullets ?? dailyPair.lesson.bullets;
-  const displaySnippet = generated?.snippet ?? dailyPair.lesson.snippet ?? "";
+  const rawSnippet = generated?.snippet ?? dailyPair.lesson.snippet ?? "";
+  const displaySnippet = useMemo(() => {
+    if (!rawSnippet || rawSnippet.includes("\n")) return rawSnippet;
+    let depth = 0;
+    return rawSnippet
+      .replace(/([;{}])\s*/g, (_, ch) => {
+        if (ch === "{") { depth++; return "{\n" + "  ".repeat(depth); }
+        if (ch === "}") { depth = Math.max(0, depth - 1); return "\n" + "  ".repeat(depth) + "}"; }
+        return ";\n" + "  ".repeat(depth);
+      });
+  }, [rawSnippet]);
   const displayRitualSteps = generated?.ritualSteps ?? ritualSteps;
   const displayInspirationIdeas = generated?.inspirationIdeas ?? buildIdeas;
+  const currentLessonResources = lessonResources[dailyPair.lesson.id] ?? [];
   const aiStatusLabel = isGenerating
     ? loadingMessage || "Loading today's AI ritual..."
     : generated
       ? `AI ritual cached for ${formatDate(dailyPair.dayKey)}`
       : "Preparing today's AI ritual";
   const aiStatusNote = generated
-    ? "Regenerate ritual overwrites today's cached ideas, lesson, and affirmations."
-    : "The app generates one AI ritual per day and keeps it in local storage.";
+    ? "Generate a new ritual overwrites today's cached ideas, lesson, and affirmations for this topic."
+    : "The app generates one AI ritual per day for your selected topic and stores it locally.";
   const themeModeNote = isMidnightTheme
     ? "Midnight Coder already includes its own dark look."
     : darkMode
@@ -460,11 +717,14 @@ const App = () => {
   };
 
   const saveJournal = () => {
-    if (!journalText.trim()) return;
+    if (!journalText.trim() && !selectedTag) return;
 
+    const text = journalText.trim() || (selectedTag ? selectedTag.label : "");
     setEntries([
       {
-        text: journalText.trim(),
+        text,
+        tag: selectedTag?.label,
+        emoji: selectedTag?.emoji,
         createdAt: new Date().toLocaleDateString("en-ZA", {
           month: "short",
           day: "numeric"
@@ -473,8 +733,14 @@ const App = () => {
       ...entries
     ]);
     setJournalText("");
-    const compliment = journalCompliments[Math.floor(Math.random() * journalCompliments.length)];
-    setShareMessage(compliment);
+    setSelectedTag(null);
+    const reframe = evidenceReframes[Math.floor(Math.random() * evidenceReframes.length)];
+    setShareMessage(reframe);
+  };
+
+  const clearJournalHistory = () => {
+    setEntries([]);
+    setShareMessage("Your local win log has been cleared.");
   };
 
   const shareDailyCard = async () => {
@@ -482,7 +748,7 @@ const App = () => {
 
     if (navigator.share) {
       await navigator.share({
-        title: "That Tech Girl",
+        title: "Soft Focus Code",
         text
       });
       setShareMessage("Shared from your ritual card.");
@@ -507,7 +773,7 @@ const App = () => {
   const handleBugSpray = () => {
     if (!sprayInput.trim()) return;
     const normalized = sprayInput.toLowerCase().trim();
-    const response = bugSprayResponses[normalized] || bugSprayResponses["default"];
+    const response = bugSprayResponses[normalized] || bugSprayResponses.default;
     setSprayResult(response);
     setSprayInput("");
   };
@@ -516,12 +782,13 @@ const App = () => {
     setJournalText((current) => (current ? `${current}\n${prompt} ` : `${prompt} `));
   };
 
-  const fetchRevisionNote = async (force = false) => {
+  const fetchRevisionNote = useCallback(async (force = false) => {
     if (!force) {
       const cachedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
-      if (cachedRevision?.dayKey === dailyPair.dayKey) {
+      if (cachedRevision?.cacheKey === cacheKey) {
         setRevision(cachedRevision.content);
         setRevisionSource(cachedRevision.sourceFile);
+        setRevisionCacheKey(cacheKey);
         setRevisionError("");
         setShowAnswer(false);
         return;
@@ -544,18 +811,20 @@ const App = () => {
 
       setRevision(data.content);
       setRevisionSource(data.sourceFile.replace(/\.md$/, "").replace(/^\d+-/, "").replaceAll("-", " "));
+      setRevisionCacheKey(cacheKey);
     } catch (error) {
       setRevisionError(error instanceof Error ? error.message : "Failed to load revision note.");
     } finally {
       setIsLoadingRevision(false);
     }
-  };
+  }, [cacheKey]);
 
-  const generateWithGemini = async (force = false) => {
+  const generateDaily = useCallback(async (force = false) => {
     if (!force) {
       const cachedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
-      if (cachedDailyAi?.dayKey === dailyPair.dayKey) {
+      if (cachedDailyAi?.cacheKey === cacheKey) {
         setGenerated(cachedDailyAi.content);
+        setGeneratedCacheKey(cacheKey);
         return;
       }
     }
@@ -571,7 +840,7 @@ const App = () => {
         },
         body: JSON.stringify({
           theme,
-          topic: dailyPair.affirmation.topic,
+          topic: preferredTopicForApi,
           experienceLevel: "early-career"
         })
       });
@@ -585,6 +854,7 @@ const App = () => {
       }
 
       setGenerated(data.content);
+      setGeneratedCacheKey(cacheKey);
       setShareMessage("Your new ritual has been manifested.");
     } catch (error) {
       setShareMessage(error instanceof Error ? error.message : "The universe said no.");
@@ -592,146 +862,147 @@ const App = () => {
       setIsGenerating(false);
       setLoadingMessage("");
     }
-  };
+  }, [cacheKey, theme, preferredTopicForApi]);
 
   useEffect(() => {
     if (!isHydrated) return;
 
+    if (initialCacheKeyRef.current === null) {
+      initialCacheKeyRef.current = cacheKey;
+    } else if (initialCacheKeyRef.current !== cacheKey) {
+      return;
+    }
+
     const cachedDailyAi = readJsonStorage<CachedDailyContent>(storageKeys.dailyAi);
-    if (cachedDailyAi?.dayKey !== dailyPair.dayKey && !isGenerating) {
-      void generateWithGemini();
+    if (cachedDailyAi?.cacheKey !== cacheKey) {
+      void generateDaily();
     }
 
     const cachedRevision = readJsonStorage<CachedRevisionCard>(storageKeys.dailyRevision);
-    if (cachedRevision?.dayKey !== dailyPair.dayKey && !isLoadingRevision) {
+    if (cachedRevision?.cacheKey !== cacheKey) {
       void fetchRevisionNote();
     }
-  }, [dailyPair.dayKey, isHydrated]);
+  }, [cacheKey, isHydrated, generateDaily, fetchRevisionNote]);
 
   return (
     <div className="app-shell">
-      <span className="sticker sticker-1">✨</span>
-      <span className="sticker sticker-2">💖</span>
-      <span className="sticker sticker-3">⭐</span>
-      <span className="sticker sticker-4">🦄</span>
-      <div className="marquee marquee-top" aria-hidden="true">
-        <span>bows, bugs, brilliance, backups, boundaries, binaries, bestie energy</span>
-      </div>
+      <nav className="top-nav" aria-label="Page sections">
+        <a className="nav-brand" href="#ritual">
+          Soft Focus Code
+        </a>
+        <div className="nav-links">
+          {navItems.map((item) => (
+            <a
+              key={item.id}
+              className={activeSection === item.id ? "nav-link active" : "nav-link"}
+              href={`#${item.id}`}
+              aria-current={activeSection === item.id ? "location" : undefined}
+            >
+              {item.label}
+            </a>
+          ))}
+        </div>
+      </nav>
 
-      <header className="hero-shell">
+      <header id="ritual" className="hero-shell">
         <motion.section
           className="hero-card"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="hero-kicker-row">
-            <div className="eyebrow-row">
-              <span className="hero-ribbon">Pink Debug Diary</span>
-              <span className="eyebrow">୨୧ soft launch</span>
-              <span className="eyebrow">✦ browser princess ✦</span>
-            </div>
+          <div className="hero-top-row">
             <span className="hero-date">{formatDate(dailyPair.dayKey)}</span>
-          </div>
-          
-          <h1>That Tech Girl</h1>
-          <p className="hero-copy">
-            {getGreeting()} A daily uplift page for chaotic techies trying to make it. Blends mini lessons,
-            bug spray, and AI-powered revision cards from <a href="https://www.pgofcode.co.za/coding-notes/" target="_blank" rel="noopener noreferrer">these coding notes</a>.
-          </p>
-
-          <div className="hero-affirmation">
-            <span className="badge">{dailyPair.affirmation.topic}</span>
-            <blockquote className="hero-affirmation-quote">
-              {displayAffirmation}
-            </blockquote>
-          </div>
-
-          <div className="hero-actions hero-actions-spaced">
-            <button className={isClaimed ? "primary claimed" : "primary"} type="button" onClick={claimRitual}>
-              {isClaimed ? "Claimed for today" : "Start the ritual"}
-            </button>
-            <button className="secondary" type="button" onClick={shareDailyCard}>
-              Share today&apos;s card
-            </button>
-            <button className="secondary" type="button" onClick={() => void generateWithGemini(true)} disabled={isGenerating}>
-              {isGenerating ? (loadingMessage || "Consulting the cosmos...") : "Regenerate ritual"}
-            </button>
-          </div>
-
-          <div className="hero-foot">
-            <div className="hero-status">
-              <span className="eyebrow eyebrow-wrap hero-status-chip">{aiStatusLabel}</span>
-              <p className="hero-status-note">{aiStatusNote}</p>
-            </div>
-            <div className="hero-status">
-              <span className="eyebrow eyebrow-wrap hero-status-chip">{themeModeNote}</span>
-              {shareMessage && <p className="hero-status-note hero-status-feedback">{shareMessage}</p>}
-            </div>
-          </div>
-        </motion.section>
-
-        <motion.aside
-          className="mood-panel"
-          initial={{ opacity: 0, x: 12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.08, duration: 0.45 }}
-        >
-          <div className="moodboard-head">
-            <span className="eyebrow">Daily moodboard</span>
             {isMidnightTheme ? (
               <span className="eyebrow mood-toggle mood-toggle-static">{activeThemeCapability}</span>
             ) : (
               <button
                 className="secondary tiny mood-toggle"
                 type="button"
-                onClick={() => {
-                  setDarkMode((value) => !value);
-                }}
+                onClick={() => setDarkMode((value) => !value)}
                 aria-pressed={effectiveDarkMode}
+                aria-label={effectiveDarkMode ? "Switch to light mode" : "Switch to dark mode"}
               >
                 {effectiveDarkMode ? "Switch to light" : "Switch to dark"}
               </button>
             )}
           </div>
-          
-          <img
-            className="mood-img"
-            src="/incredible-suggestion.jpg"
-            alt="A cat surrounded by pointing hands with the text 'incredible suggestion'"
-          />
 
+          <div className="hero-main">
+            <div className="hero-intro">
+              <h1>Soft Focus Code</h1>
+              <p className="hero-tagline">{getGreeting()}</p>
+              <p className="hero-copy">
+                Daily affirmations, mini lessons, and AI-powered revision cards from{" "}
+                <a href="https://www.pgofcode.co.za/coding-notes/" target="_blank" rel="noopener noreferrer">
+                  these coding notes
+                </a>
+                .
+              </p>
+            </div>
+            <img
+              className="hero-cat-img"
+              src="/incredible-suggestion.jpg"
+              alt="A cat surrounded by pointing hands with the text 'incredible suggestion'"
+            />
+          </div>
 
-          
-          <div
-            className="mood-stat mood-stat-link"
-            onClick={() => document.getElementById("glow-up-lesson")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          <div className="hero-affirmation">
+            <span className="badge">{dailyPair.affirmation.topic}</span>
+            <blockquote className="hero-affirmation-quote">{displayAffirmation}</blockquote>
+            <p className="hero-mantra">{displayMantra}</p>
+          </div>
+
+          <div className="hero-actions">
+            <button className={isClaimed ? "primary claimed" : "primary"} type="button" onClick={claimRitual}>
+              {isClaimed ? "Claimed for today" : "Claim today's ritual"}
+            </button>
+            <button className="secondary" type="button" onClick={shareDailyCard}>
+              Share card
+            </button>
+            <button className="secondary" type="button" onClick={() => void generateDaily(true)} disabled={isGenerating}>
+              {isGenerating ? (loadingMessage || "Generating...") : "Pull a new card"}
+            </button>
+          </div>
+
+          {shareMessage && (
+            <p className={shareMessage.includes("Missing") || shareMessage.includes("failed") || shareMessage.includes("error")
+              ? "hero-status-error"
+              : "hero-toast"
+            }>{shareMessage}</p>
+          )}
+        </motion.section>
+
+        <motion.div
+          className="mood-strip"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.45 }}
+        >
+          <button
+            className="mood-strip-card mood-strip-lesson"
+            type="button"
+            onClick={() => document.getElementById("lesson")?.scrollIntoView({ behavior: "smooth", block: "start" })}
           >
-            <strong>{dailyPair.lesson.category} focus</strong>
-            <span>{displayLessonTitle}</span>
-          </div>
-
-          <div className="mood-quote">
-            <span className="eyebrow">Mantra</span>
-            <p>{displayMantra}</p>
-          </div>
+            <span className="mood-stat-label">{dailyPair.lesson.category} focus</span>
+            <p className="mood-stat-title">{displayLessonTitle}</p>
+          </button>
 
           <button
-            className="mood-vibe-card"
+            className="mood-strip-card mood-strip-vibe"
             type="button"
             onClick={() => {
               setVibeMessage(vibeCheckResponses[Math.floor(Math.random() * vibeCheckResponses.length)]);
             }}
           >
-            <span className="eyebrow">Vibe check</span>
-            <p className="mood-vibe-prompt">Check my vibe</p>
+            <span className="mood-stat-label">Vibe check</span>
             <p className="mood-vibe-result" aria-live="polite">
               {vibeMessage || "Tap for today's energy read."}
             </p>
           </button>
-          <div className="hero-support-card mood-support-compact">
-            <div className="hero-support-copy">
-              <span className="eyebrow">Support familiar</span>
+
+          <div className="mood-strip-card mood-strip-support">
+            <div>
               <p className="mood-support-message">
                 Your soft little reminder that you can absolutely do this.
               </p>
@@ -742,11 +1013,12 @@ const App = () => {
               alt="A cat with a note that says you can do this"
             />
           </div>
-        </motion.aside>
+        </motion.div>
       </header>
 
       <main className="main-grid">
         <motion.section
+          id="protocol"
           className="card ritual-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -772,8 +1044,8 @@ const App = () => {
           </div>
         </motion.section>
 
-        <motion.aside
-          id="glow-up-lesson"
+        <motion.section
+          id="lesson"
           className="card lesson-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -787,9 +1059,9 @@ const App = () => {
             </div>
             <h2>{displayLessonTitle}</h2>
           </div>
-          
+
           <p className="section-copy">{displayLessonSummary}</p>
-          
+
           <div className="ritual-steps">
             {displayLessonBullets.map((bullet) => (
               <article key={bullet} className="step-card">
@@ -800,19 +1072,38 @@ const App = () => {
           </div>
 
           {displaySnippet && (
-            <div className="mood-stat">
-              <strong>Code Snippet</strong>
+            <div className="mood-stat lesson-resource-card">
+              <strong>Code snippet</strong>
               <pre>
-                <code>{displaySnippet}</code>
+                <code
+                  className="hljs"
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlightAuto(displaySnippet, ["javascript", "bash", "markdown"]).value,
+                  }}
+                />
               </pre>
               <button className="secondary snippet-action" type="button" onClick={copySnippet}>
                 {copiedSnippet ? "Copied" : "Copy snippet"}
               </button>
             </div>
           )}
-        </motion.aside>
+
+          {currentLessonResources.length > 0 && (
+            <div className="resource-list">
+              <span className="eyebrow">Go deeper</span>
+              <div className="resource-links">
+                {currentLessonResources.map((resource) => (
+                  <a key={resource.href} className="resource-link" href={resource.href} target="_blank" rel="noopener noreferrer">
+                    {resource.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.section>
 
         <motion.section
+          id="revision"
           className="card revision-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -836,6 +1127,7 @@ const App = () => {
             >
               {isLoadingRevision ? "Loading..." : revision ? "Open today's card" : "Start recall session"}
             </button>
+            <span className="soft-note">Keyboard-friendly reveal flow with one cached card per day and topic.</span>
           </div>
 
           {revisionError && <p className="eyebrow revision-error-chip">{revisionError}</p>}
@@ -844,28 +1136,25 @@ const App = () => {
             <div className="mood-stat">
               <strong>Question from {revisionSource}</strong>
               <p className="revision-question">{revision.question}</p>
-              
+
               <button
                 className="secondary"
                 type="button"
                 onClick={() => setShowAnswer(!showAnswer)}
+                aria-expanded={showAnswer}
               >
                 {showAnswer ? "Hide answer" : "Reveal answer"}
               </button>
-              
+
               {showAnswer && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="revision-answer"
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="revision-answer">
                   <p>{revision.answer}</p>
                   {revision.codeExample && (
-                    <pre className="revision-code"><code>{revision.codeExample}</code></pre>
+                    <pre className="revision-code">
+                      <code>{revision.codeExample}</code>
+                    </pre>
                   )}
-                  <div className="badge revision-tip-chip">
-                    TIP: {revision.tip}
-                  </div>
+                  <div className="badge revision-tip-chip">TIP: {revision.tip}</div>
                 </motion.div>
               )}
             </div>
@@ -873,6 +1162,7 @@ const App = () => {
         </motion.section>
 
         <motion.section
+          id="win-log"
           className="card journal-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -880,100 +1170,108 @@ const App = () => {
           transition={{ duration: 0.45 }}
         >
           <div className="section-head">
-            <span className="eyebrow">Log a win</span>
-            <h2>What moved because you showed up?</h2>
+            <div className="eyebrow-row">
+              <span className="eyebrow">Evidence file</span>
+              {entries.length > 0 && <span className="badge">{entries.length} logged</span>}
+            </div>
+            <h2>Build your case against imposter syndrome</h2>
+            <p className="section-copy">Every entry is proof. Tap what you did, add details if you want, and log it.</p>
           </div>
 
-          <div className="prompt-row">
-            {journalPrompts.map((prompt) => (
-              <button key={prompt} className="prompt-chip" type="button" onClick={() => usePrompt(prompt)}>
-                {prompt}
+          <div className="evidence-tags">
+            {evidenceTags.map((tag) => (
+              <button
+                key={tag.label}
+                className={selectedTag?.label === tag.label ? "evidence-tag active" : "evidence-tag"}
+                type="button"
+                onClick={() => setSelectedTag(selectedTag?.label === tag.label ? null : tag)}
+              >
+                <span className="evidence-tag-emoji">{tag.emoji}</span>
+                {tag.label}
               </button>
             ))}
           </div>
 
+          <label className="sr-only" htmlFor="journal-input">
+            Add details (optional)
+          </label>
           <textarea
+            id="journal-input"
             className="journal-input"
-            placeholder="Deployed my first feature, fixed a weird CSS issue..."
+            placeholder={selectedTag ? `What happened? (optional — "${selectedTag.label}" is enough)` : "What did you do today that a fake person couldn't?"}
             value={journalText}
             onChange={(event) => setJournalText(event.target.value)}
           />
 
           <div className="cta-row">
-            <button className="primary" type="button" onClick={saveJournal}>
-              Save technical win
+            <button className="primary" type="button" onClick={saveJournal} disabled={!journalText.trim() && !selectedTag}>
+              Log evidence
             </button>
-            <span className="soft-note">Local-first storage active</span>
+            {entries.length > 0 && (
+              <button className="secondary" type="button" onClick={clearJournalHistory}>
+                Clear all
+              </button>
+            )}
           </div>
 
-          <div className="mood-quote journal-affirmation">
-            <strong>Your logic is solid</strong>
-            <p>{journalAffirmation}</p>
-          </div>
-
-          <div className="ritual-steps journal-entries">
-            {entries.slice(0, 3).map((entry) => (
-              <article key={`${entry.createdAt}-${entry.text}`} className="step-card">
-                <span className="eyebrow">{entry.createdAt}</span>
-                <p>{entry.text}</p>
-              </article>
-            ))}
-          </div>
-        </motion.section>
-        <motion.section
-          className="card archive-stage chapter-energy"
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.45 }}
-        >
-          <div className="section-head compact">
-            <div>
-              <span className="eyebrow">More energy</span>
-              <h2>Other affirmations in the rotation</h2>
+          {entries.length > 0 && (
+            <div className="evidence-history">
+              <div className="evidence-count-bar">
+                <span className="eyebrow">{entries.length} piece{entries.length === 1 ? "" : "s"} of evidence</span>
+                <p className="evidence-reframe">{journalAffirmation}</p>
+              </div>
+              <div className="evidence-entries">
+                {entries.map((entry) => (
+                  <article key={`${entry.createdAt}-${entry.text}`} className="evidence-entry">
+                    {entry.emoji && <span className="evidence-entry-emoji">{entry.emoji}</span>}
+                    <div className="evidence-entry-content">
+                      <p>{entry.text}</p>
+                      <span className="evidence-entry-date">{entry.createdAt}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
-          </div>
-          <div className="archive-grid archive-energy-grid">
-            {archiveCards.map((entry) => (
-              <article key={`${entry.topic}-${entry.mantra}`} className="archive-card archive-energy-card">
-                <span className="badge">{entry.topic}</span>
-                <p>{entry.mantra}</p>
-              </article>
-            ))}
-          </div>
+          )}
         </motion.section>
 
         <motion.section
+          id="inspiration"
           className="card inspiration-stage chapter-unlocks"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.45 }}
         >
-          <div className="section-head compact">
-            <div>
-              <span className="eyebrow">What this unlocks</span>
-              <h2>Ways to use the skills you're building</h2>
-            </div>
+          <div className="section-head">
+            <span className="eyebrow">What this unlocks</span>
+            <h2>Ways to use the skills you&apos;re building</h2>
           </div>
-          <p className="section-copy">
-            These lessons are not just for getting through tickets. They are the foundation for building useful apps,
-            sharper AI workflows, and more ambitious technical experiments.
-          </p>
           <div className="archive-grid inspiration-grid">
             {displayInspirationIdeas.map((idea) => (
               <article key={idea.title} className="archive-card inspiration-card">
                 <span className="badge">{idea.label}</span>
                 <p>{idea.title}</p>
-                <span className="soft-note inspiration-copy">
-                  {idea.description}
-                </span>
+                <span className="soft-note inspiration-copy">{idea.description}</span>
               </article>
             ))}
+          </div>
+
+          <div className="affirmation-strip">
+            <span className="eyebrow">More affirmations</span>
+            <div className="affirmation-strip-cards">
+              {archiveCards.map((entry) => (
+                <div key={`${entry.topic}-${entry.mantra}`} className="affirmation-strip-card">
+                  <span className="badge">{entry.topic}</span>
+                  <p>{entry.mantra}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </motion.section>
 
         <motion.section
+          id="bug-spray"
           className="card bug-spray-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -986,22 +1284,31 @@ const App = () => {
           </div>
 
           <p className="section-copy">
-            Having a rough day? Type what's bothering you and hit spray. Watch it disappear (metaphorically).
+            Having a rough day? Type what&apos;s bothering you and hit spray. Watch it disappear (metaphorically).
           </p>
 
-          <div className="spray-input-row">
+          <form
+            className="spray-input-row"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleBugSpray();
+            }}
+          >
+            <label className="sr-only" htmlFor="spray-input">
+              Type the annoyance you want to spray away
+            </label>
             <input
+              id="spray-input"
               type="text"
               className="spray-input"
               placeholder="meetings, tech debt, bugs..."
               value={sprayInput}
               onChange={(e) => setSprayInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleBugSpray()}
             />
-            <button className="primary spray-btn" type="button" onClick={handleBugSpray}>
-              🦋 spray
+            <button className="primary spray-btn" type="submit">
+              Spray it away
             </button>
-          </div>
+          </form>
 
           {sprayResult && (
             <motion.div
@@ -1010,13 +1317,16 @@ const App = () => {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <span className="spray-emoji">💨</span>
+              <span className="spray-emoji" aria-hidden="true">
+                💨
+              </span>
               <p>{sprayResult}</p>
             </motion.div>
           )}
         </motion.section>
 
         <motion.section
+          id="palette"
           className="card settings-stage"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1058,13 +1368,20 @@ const App = () => {
             </div>
           </div>
         </motion.section>
+
       </main>
 
       <footer className="app-footer">
-        <p>{footerMessages[Math.floor(Math.random() * footerMessages.length)]}</p>
-        <p className="footer-link-row">
-          <a href="https://www.pgofcode.co.za/" target="_blank" rel="noopener noreferrer">୨୧ pg of code ୨୧</a>
-        </p>
+        <p>{footerMessage}</p>
+        <div className="footer-link-row">
+          <a href="https://www.pgofcode.co.za/" target="_blank" rel="noopener noreferrer">
+            Pg of Code
+          </a>
+          <a href="https://github.com/Nadia-JSch/that-tech-girl-app" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </div>
+        <p className="footer-privacy">All data stored locally in your browser. AI-generated content is for inspiration only.</p>
       </footer>
     </div>
   );
