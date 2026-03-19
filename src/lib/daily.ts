@@ -1,4 +1,4 @@
-import { affirmations, lessons } from "../data/content";
+import { affirmations, lessons, type Topic } from "../data/content";
 
 const hashDay = (date: Date) => {
   const y = date.getFullYear();
@@ -8,9 +8,12 @@ const hashDay = (date: Date) => {
   return dayStamp.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
 };
 
-export const getDailyPair = (date = new Date()) => {
+export const getDailyPair = (date = new Date(), preferredTopic?: Topic) => {
   const hash = hashDay(date);
-  const affirmation = affirmations[hash % affirmations.length];
+  const rotation = preferredTopic
+    ? affirmations.filter((entry) => entry.topic === preferredTopic)
+    : affirmations;
+  const affirmation = rotation[hash % rotation.length] ?? affirmations[hash % affirmations.length];
   const lesson = lessons.find((entry) => entry.id === affirmation.lessonId) ?? lessons[0];
 
   const y = date.getFullYear();

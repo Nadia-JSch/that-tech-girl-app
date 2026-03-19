@@ -41,12 +41,13 @@ const groqChat = async (prompt, temperature = 0.9) => {
   return JSON.parse(data.choices[0].message.content);
 };
 
-const buildPrompt = ({ theme, topic, experienceLevel }) => `You are writing content for a hyper-feminine but smart women-in-tech PWA.
+const buildPrompt = ({ theme, topic, experienceLevel }) => `You are writing content for a beginner women-in-tech PWA.
 
 Brand voice:
-- playful, glossy, over-the-top, coquette, a little ironic
-- still technically credible and useful
-- never patronizing, vague, or cringe
+- confident, professional, empowering
+- grounded and authentic, not over-the-top
+- technically credible and useful
+- never generic, patronizing, or try-hard
 - keep output concise
 
 Task:
@@ -114,14 +115,14 @@ Return JSON only with this exact shape:
 }
 
 Rules:
-- affirmation: 1-2 sentences
-- mantra: short and punchy
+- affirmation: 1-2 sentences, genuine and specific
+- mantra: short, memorable, not generic
 - lesson: practical, technically correct, and educational; it should explain one specific idea, not just say what the user should learn
 - lessonTitle: name the concrete concept or move being taught, not a vague aspiration
 - lessonSummary: 1-2 sentences that explain what the concept is, why it matters, and when to use it
-- bullets: exactly 3; each bullet should teach a real point, step, distinction, or debugging insight
-- ritualSteps: exactly 3
-- archiveAffirmations: exactly 3 distinct extra affirmations that fit the app voice and can draw from any supported topic, including visibility, pacing, imposter syndrome, mistakes, comparison, and communication
+- bullets: exactly 3, actionable; each bullet should teach a real point, step, distinction, or debugging insight
+- ritualSteps: exactly 3, specific actions
+- archiveAffirmations: exactly 3 distinct extra affirmations that fit the same app voice and can draw from any supported topic, including visibility, pacing, imposter syndrome, mistakes, comparison, and communication
 - inspirationIdeas: exactly 4 concrete, inspiring ideas tied to building with CRUD, APIs, async JS, Git, workplace communication, AI workflows, vibe coding, MCPs, or adjacent emergent tooling
 - snippet: either a short code snippet or a short workplace phrase that directly matches the lesson and demonstrates the concept
 - align the lesson to the same topic as the affirmation
