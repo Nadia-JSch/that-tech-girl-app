@@ -119,26 +119,6 @@ const loadingMessages = [
   "Recalculating your main character arc..."
 ];
 
-const journalCompliments = [
-  "The compile gods are pleased.",
-  "Your code is giving main character energy.",
-  "This ship has been logged in the universe.",
-  "The stack overflowed with joy.",
-  "Your git history just got more interesting.",
-  "The PR gods have accepted this offering.",
-  "Your branch was merged successfully.",
-  "This win has been committed to memory.",
-  "The algorithm is shook.",
-  "Your future self is obsessed with this entry.",
-  "This is what a person who belongs here sounds like.",
-  "The evidence board just got hotter.",
-  "Your technical aura has been updated.",
-  "A deeply chic display of competence.",
-  "The system recognizes this as a real win.",
-  "This entry has strong promotion-review energy.",
-  "Your progress log is getting impossible to argue with."
-];
-
 const footerMessages = [
   "/* running on caffeine and good intentions */",
   "/* built with sparkle motion and chaos */",
@@ -688,14 +668,6 @@ const App = () => {
   const displayRitualSteps = generated?.ritualSteps ?? ritualSteps;
   const displayInspirationIdeas = generated?.inspirationIdeas ?? buildIdeas;
   const currentLessonResources = lessonResources[dailyPair.lesson.id] ?? [];
-  const aiStatusLabel = isGenerating
-    ? loadingMessage || "Loading today's AI ritual..."
-    : generated
-      ? `AI ritual cached for ${formatDate(dailyPair.dayKey)}`
-      : "Preparing today's AI ritual";
-  const aiStatusNote = generated
-    ? "Generate a new ritual overwrites today's cached ideas, lesson, and affirmations for this topic."
-    : "The app generates one AI ritual per day for your selected topic and stores it locally.";
   const themeModeNote = isMidnightTheme
     ? "Midnight Coder already includes its own dark look."
     : darkMode
@@ -776,10 +748,6 @@ const App = () => {
     const response = bugSprayResponses[normalized] || bugSprayResponses.default;
     setSprayResult(response);
     setSprayInput("");
-  };
-
-  const usePrompt = (prompt: string) => {
-    setJournalText((current) => (current ? `${current}\n${prompt} ` : `${prompt} `));
   };
 
   const fetchRevisionNote = useCallback(async (force = false) => {
