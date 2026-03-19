@@ -27,6 +27,11 @@ export type Lesson = {
   snippet?: string;
 };
 
+export type LessonResource = {
+  label: string;
+  href: string;
+};
+
 export type Affirmation = {
   id: string;
   topic: Topic;
@@ -65,6 +70,20 @@ export const themes: Record<
     surfaceClass: "theme-midnight"
   }
 };
+
+export const topicOptions: Array<{ value: Topic; label: string }> = [
+  { value: "confidence", label: "Confidence" },
+  { value: "learning", label: "Learning" },
+  { value: "feedback", label: "Feedback" },
+  { value: "debugging", label: "Debugging" },
+  { value: "career", label: "Career" },
+  { value: "visibility", label: "Visibility" },
+  { value: "pacing", label: "Pacing" },
+  { value: "imposter syndrome", label: "Imposter syndrome" },
+  { value: "mistakes", label: "Mistakes" },
+  { value: "comparison", label: "Comparison" },
+  { value: "communication", label: "Communication" }
+];
 
 export const lessons: Lesson[] = [
   {
@@ -189,13 +208,80 @@ export const lessons: Lesson[] = [
   }
 ];
 
+export const lessonResources: Record<string, LessonResource[]> = {
+  "lesson-async-await": [
+    {
+      label: "MDN: async function",
+      href: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function"
+    },
+    {
+      label: "MDN: Promise.all()",
+      href: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all"
+    }
+  ],
+  "lesson-communication": [
+    {
+      label: "GitHub Docs: communicating in issues and PRs",
+      href: "https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues"
+    }
+  ],
+  "lesson-git-flow": [
+    {
+      label: "GitHub Docs: Git basics",
+      href: "https://docs.github.com/en/get-started/using-git/about-git"
+    }
+  ],
+  "lesson-api-design": [
+    {
+      label: "MDN: Working with JSON",
+      href: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/JSON"
+    }
+  ],
+  "lesson-crud": [
+    {
+      label: "MDN: Fetch API",
+      href: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API"
+    }
+  ],
+  "lesson-fetch-patterns": [
+    {
+      label: "MDN: Using the Fetch API",
+      href: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch"
+    }
+  ],
+  "lesson-feedback": [
+    {
+      label: "Atlassian: code review best practices",
+      href: "https://www.atlassian.com/blog/add-ons/code-review-best-practices"
+    }
+  ],
+  "lesson-pr-bestie": [
+    {
+      label: "GitHub Docs: reviewing proposed changes",
+      href: "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/about-pull-request-reviews"
+    }
+  ],
+  "lesson-brag-doc": [
+    {
+      label: "The Muse: how to keep a brag document",
+      href: "https://www.themuse.com/advice/brag-document"
+    }
+  ],
+  "lesson-ts-record": [
+    {
+      label: "TypeScript Handbook: utility types",
+      href: "https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type"
+    }
+  ]
+};
+
 export const affirmations: Affirmation[] = [
   {
     id: "affirm-confidence",
     topic: "confidence",
     text: "I speak up with grace and glitter. My questions sharpen the room, and my ideas deserve air time.",
     mantra: "My voice belongs in every technical conversation.",
-    lessonId: "lesson-context"
+    lessonId: "lesson-communication"
   },
   {
     id: "affirm-learning",
@@ -301,5 +387,159 @@ export const affirmations: Affirmation[] = [
     text: "Asking for clarity is not a sign of incompetence. It is how I make sure I do the work right the first time.",
     mantra: "Clarity-seeking is a professional skill, not a weakness.",
     lessonId: "lesson-communication"
+  },
+  {
+    id: "affirm-confidence-3",
+    topic: "confidence",
+    text: "I do not need to sound perfect to sound credible. My thinking has substance, and my perspective adds value in real time.",
+    mantra: "My ideas are allowed to arrive before they are polished.",
+    lessonId: "lesson-communication"
+  },
+  {
+    id: "affirm-confidence-4",
+    topic: "confidence",
+    text: "I trust the proof of my own practice. Every solved problem, shipped fix, and brave question has built real authority.",
+    mantra: "My confidence is evidence-based.",
+    lessonId: "lesson-ts-record"
+  },
+  {
+    id: "affirm-learning-3",
+    topic: "learning",
+    text: "I learn in layers. What feels confusing now is often just the edge of my next breakthrough.",
+    mantra: "Confusion is not failure. It is the door before understanding.",
+    lessonId: "lesson-fetch-patterns"
+  },
+  {
+    id: "affirm-learning-4",
+    topic: "learning",
+    text: "I am building technical depth one clear concept at a time. My pace is not a problem when it creates real understanding.",
+    mantra: "I study to understand, not to perform speed.",
+    lessonId: "lesson-crud"
+  },
+  {
+    id: "affirm-feedback-3",
+    topic: "feedback",
+    text: "I can hear a note without turning it into a story about my worth. I am here to iterate, not to be untouchable.",
+    mantra: "A note is a direction, not a verdict.",
+    lessonId: "lesson-feedback"
+  },
+  {
+    id: "affirm-feedback-4",
+    topic: "feedback",
+    text: "Review is a collaboration space, not a courtroom. I stay open, specific, and rooted in what will make the work stronger.",
+    mantra: "Feedback helps me sharpen, not shrink.",
+    lessonId: "lesson-pr-bestie"
+  },
+  {
+    id: "affirm-debugging-3",
+    topic: "debugging",
+    text: "I do not need to panic to solve a problem. I can slow down, inspect the system, and let the answer emerge from the details.",
+    mantra: "Calm is part of the method.",
+    lessonId: "lesson-fetch-patterns"
+  },
+  {
+    id: "affirm-debugging-4",
+    topic: "debugging",
+    text: "Every bug is information. I follow the trail, reduce the noise, and move with the quiet confidence of someone who figures things out.",
+    mantra: "I debug with patience, not drama.",
+    lessonId: "lesson-api-design"
+  },
+  {
+    id: "affirm-career-3",
+    topic: "career",
+    text: "I am allowed to want visibility, ease, money, range, and meaningful work at the same time. Ambition can be elegant.",
+    mantra: "I grow on purpose, not by accident.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-career-4",
+    topic: "career",
+    text: "My career is not built only in dramatic moments. It is also built in the quiet consistency of good judgment, follow-through, and taste.",
+    mantra: "My body of work is speaking for me every day.",
+    lessonId: "lesson-git-flow"
+  },
+  {
+    id: "affirm-visibility-2",
+    topic: "visibility",
+    text: "I let my work be seen without performing a louder version of myself. Clarity, receipts, and consistency are enough.",
+    mantra: "My impact does not need theatrics to be real.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-visibility-3",
+    topic: "visibility",
+    text: "I can make my contributions legible. What I finish, improve, document, and notice all count as real value.",
+    mantra: "I am learning to leave a clearer trail of my work.",
+    lessonId: "lesson-communication"
+  },
+  {
+    id: "affirm-pacing-2",
+    topic: "pacing",
+    text: "I refuse to confuse urgency with importance. The quality of my understanding protects the quality of my work.",
+    mantra: "Depth is a strength, not a delay.",
+    lessonId: "lesson-async-await"
+  },
+  {
+    id: "affirm-pacing-3",
+    topic: "pacing",
+    text: "I can move gently and still move seriously. My pace makes room for thoughtfulness, which saves me from avoidable chaos later.",
+    mantra: "I build at a pace that can hold.",
+    lessonId: "lesson-git-flow"
+  },
+  {
+    id: "affirm-imposter-syndrome-2",
+    topic: "imposter syndrome",
+    text: "I am not required to relitigate my belonging every morning. My work, growth, and presence already answer that question.",
+    mantra: "Belonging is not up for daily review.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-imposter-syndrome-3",
+    topic: "imposter syndrome",
+    text: "Feeling unsure does not cancel my skill. I can be stretched, learning, and still entirely legitimate in the room.",
+    mantra: "Uncertainty and capability can exist together.",
+    lessonId: "lesson-feedback"
+  },
+  {
+    id: "affirm-mistakes-2",
+    topic: "mistakes",
+    text: "I can make a mistake without making it my identity. Repair is more useful than shame, and I know how to repair.",
+    mantra: "I recover with clarity and self-respect.",
+    lessonId: "lesson-fetch-patterns"
+  },
+  {
+    id: "affirm-mistakes-3",
+    topic: "mistakes",
+    text: "Real builders misread things, miss things, and learn things. What matters is how honestly and calmly I respond next.",
+    mantra: "I am allowed to be imperfect and still professional.",
+    lessonId: "lesson-git-flow"
+  },
+  {
+    id: "affirm-comparison-2",
+    topic: "comparison",
+    text: "I release the fantasy that someone else's timeline should fit my life. My progress becomes stronger when it becomes mine.",
+    mantra: "I measure my path by truth, not by noise.",
+    lessonId: "lesson-crud"
+  },
+  {
+    id: "affirm-comparison-3",
+    topic: "comparison",
+    text: "I do not need to rush to keep up with an edited version of someone else's story. My work can be quiet, deep, and still excellent.",
+    mantra: "My pace and path are allowed to be personal.",
+    lessonId: "lesson-brag-doc"
+  },
+  {
+    id: "affirm-communication-2",
+    topic: "communication",
+    text: "Precision is a kindness in technical work. I can ask better questions, give clearer updates, and make collaboration easier for everyone.",
+    mantra: "My clarity creates momentum.",
+    lessonId: "lesson-communication"
+  },
+  {
+    id: "affirm-communication-3",
+    topic: "communication",
+    text: "I am allowed to pause and get specific. The more clearly I name the issue, the faster the right help can find me.",
+    mantra: "Specificity is one of my strengths.",
+    lessonId: "lesson-feedback"
   }
 ];
